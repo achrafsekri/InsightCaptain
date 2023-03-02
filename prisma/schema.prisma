@@ -45,12 +45,12 @@ model Session {
 }
 
 model User {
-    id            String    @id @default(cuid())
+    id            String             @id @default(cuid())
     name          String?
-    email         String?   @unique
+    email         String?            @unique
     emailVerified DateTime?
     image         String?
-    organization userOrganization[]
+    organizations userOrganization[]
     accounts      Account[]
     sessions      Session[]
 }
@@ -65,32 +65,107 @@ model VerificationToken {
 
 // Organization model
 model Organization {
-    id        String   @id @default(cuid())
+    id        String             @id @default(cuid())
     name      String
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+    createdAt DateTime           @default(now())
+    updatedAt DateTime           @updatedAt
     users     userOrganization[]
-    
+    invite    invite[]
+    Survey    Survey[]
+    Poll      Poll[]
+    CaseStudy CaseStudy[]
 }
 
 model userOrganization {
-    id        String   @id @default(cuid())
-    userId    String
+    id             String       @id @default(cuid())
+    role           Role         @default(MEMBER)
+    userId         String
     organizationId String
-    role      Role    @default(MEMBER)
-    user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-    organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-    joinedAt  DateTime @default(now())
+    user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+    organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+    joinedAt       DateTime     @default(now())
 }
 
 model invite {
-    id        String   @id @default(cuid())
-    email     String
+    id             String       @id @default(cuid())
+    invitationCode String       @unique @default(cuid())
+    email          String
     organizationId String
-    role      Role    @default(MEMBER)
-    status    InviteStatus @default(PENDING)
+    joined         Boolean      @default(false)
+    role           Role         @default(MEMBER)
+    status         InviteStatus @default(PENDING)
+    organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+    createdAt      DateTime     @default(now())
+    updatedAt      DateTime     @updatedAt
+}
+
+model PollOption {
+    id          String    @id @default(cuid())
+    title       String
+    OptionCount Int       @default(0)
+    pollId      String
+    PollFeildId String
+    PollFeild   PollFeild @relation(fields: [PollFeildId], references: [id], onDelete: Cascade)
+    createdAt   DateTime  @default(now())
+    updatedAt   DateTime  @updatedAt
+}
+
+model PollFeild {
+    id         String       @id @default(cuid())
+    title      String
+    pollId     String
+    type       String
+    PollOption PollOption[]
+    response   String
+    poll       Poll         @relation(fields: [pollId], references: [id], onDelete: Cascade)
+    createdAt  DateTime     @default(now())
+    updatedAt  DateTime     @updatedAt
+}
+
+model SurveyFeild {
+    id        String   @id @default(cuid())
+    title     String
+    surveyId  String
+    survey    Survey   @relation(fields: [surveyId], references: [id], onDelete: Cascade)
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
+}
+
+model Survey {
+    id             String        @id @default(cuid())
+    title          String
+    description    String
+    organizationId String
+    caseStudyId    String
+    SurveyField    SurveyFeild[]
+    caseStudy      CaseStudy     @relation(fields: [caseStudyId], references: [id], onDelete: Cascade)
+    organization   Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+    createdAt      DateTime      @default(now())
+    updatedAt      DateTime      @updatedAt
+}
+
+model Poll {
+    id             String       @id @default(cuid())
+    title          String
+    organizationId String
+    caseStudyId    String
+    PollFeild      PollFeild[]
+    caseStudy      CaseStudy    @relation(fields: [caseStudyId], references: [id], onDelete: Cascade)
+    organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+    createdAt      DateTime     @default(now())
+    updatedAt      DateTime     @updatedAt
+}
+
+model CaseStudy {
+    id             String       @id @default(cuid())
+    title          String
+    description    String
+    polls          Poll[]
+    surveys        Survey[]
+    organizationId String
+    organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+    createdAt      DateTime     @default(now())
+    updatedAt      DateTime     @updatedAt
 }
 
 enum Role {
