@@ -30,11 +30,11 @@ export default async function handler(
       //by users ids get the user data
 
       if (!users) {
-        return res.status(404).json({ message: "Organization not found" });
+        res.status(404).json(formatResponse(null, "No users found", "404"));
       }
       return res.status(200).json(formatResponse(users, "Success", "OK"));
     } catch {
-      res.status(500).json({ message: "Something went wrong" });
+      res.status(500).json(formatResponse(null, "Something went wrong", "500"));
     }
   }
 }

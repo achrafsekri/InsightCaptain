@@ -16,7 +16,7 @@ export default async function handler(
   if (req.method === "GET") {
     try {
       const { organisationId } = req.query;
-      console.log(req.query)
+      console.log(req.query);
       const getOrganization = await prisma.organization.findUnique({
         where: {
           id: String(organisationId),
@@ -29,7 +29,7 @@ export default async function handler(
         .status(200)
         .json(formatResponse(getOrganization, "Success", "OK"));
     } catch {
-      res.status(500).json({ message: "Something went wrong" });
+      res.status(500).json(formatResponse(null, "Something went wrong", "500"));
     }
   } else {
     if (req.method === "PATCH") {
@@ -48,7 +48,9 @@ export default async function handler(
           .status(200)
           .json(formatResponse(updateOrganization, "Success", "OK"));
       } catch {
-        res.status(500).json({ message: "Something went wrong" });
+        res
+          .status(500)
+          .json(formatResponse(null, "Something went wrong", "500"));
       }
     }
     if (req.method === "DELETE") {
@@ -61,7 +63,9 @@ export default async function handler(
         });
         return res.status(200).json("Organization deleted successfully!");
       } catch {
-        res.status(500).json({ message: "Something went wrong" });
+        res
+          .status(500)
+          .json(formatResponse(null, "Something went wrong", "500"));
       }
     }
   }

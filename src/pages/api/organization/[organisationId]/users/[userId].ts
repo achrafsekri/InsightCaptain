@@ -27,7 +27,7 @@ export default async function handler(
       });
       return res.status(200).json(formatResponse(addUser, "Success", "OK"));
     } catch {
-      res.status(500).json({ message: "Something went wrong" });
+      res.status(500).json(formatResponse(null, "Something went wrong", "500"));
     }
   }
   if (req.method === "DELETE") {
@@ -45,9 +45,7 @@ export default async function handler(
         .status(200)
         .json(formatResponse("User removed successefuly ", "Success", "OK"));
     } catch {
-      res.status(500).json({
-        message: "Something went wrong removing the user from the organization",
-      });
+      res.status(500).json(formatResponse(null, "Something went wrong", "500"));
     }
   }
 
@@ -62,14 +60,12 @@ export default async function handler(
           organizationId: String(organizationId),
         },
         data: {
-          role:newRole,
+          role: newRole,
         },
       });
       return res.status(200).json(formatResponse(updateRole, "Success", "OK"));
     } catch {
-      res
-        .status(500)
-        .json({ message: "Something went wrong updating the user's role" });
+      res.status(500).json(formatResponse(null, "Something went wrong", "500"));
     }
   }
 }
