@@ -159,6 +159,7 @@ model Poll {
 model CaseStudy {
     id             String       @id @default(cuid())
     title          String
+    image          String
     description    String
     polls          Poll[]
     surveys        Survey[]
