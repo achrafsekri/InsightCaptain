@@ -99,27 +99,36 @@ model invite {
     updatedAt      DateTime     @updatedAt
 }
 
-model PollOption {
-    id          String    @id @default(cuid())
-    title       String
-    OptionCount Int       @default(0)
-    pollId      String
-    PollFeildId String
-    PollFeild   PollFeild @relation(fields: [PollFeildId], references: [id], onDelete: Cascade)
-    createdAt   DateTime  @default(now())
-    updatedAt   DateTime  @updatedAt
+model Poll {
+    id             String       @id @default(cuid())
+    title          String
+    pollType       PollType     @default(SINGLE)
+    organizationId String
+    caseStudyId    String
+    options        PollOption[]
+    caseStudy      CaseStudy    @relation(fields: [caseStudyId], references: [id], onDelete: Cascade)
+    organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+    createdAt      DateTime     @default(now())
+    updatedAt      DateTime     @updatedAt
 }
 
-model PollFeild {
-    id         String       @id @default(cuid())
-    title      String
-    pollId     String
-    type       String
-    PollOption PollOption[]
-    response   String
-    poll       Poll         @relation(fields: [pollId], references: [id], onDelete: Cascade)
-    createdAt  DateTime     @default(now())
-    updatedAt  DateTime     @updatedAt
+model PollOption {
+    id          String       @id @default(cuid())
+    title       String
+    pollId      String
+    poll        Poll         @relation(fields: [pollId], references: [id], onDelete: Cascade)
+    createdAt   DateTime     @default(now())
+    updatedAt   DateTime     @updatedAt
+    PollAnswers PollAnswer[]
+}
+
+model PollAnswer {
+    id           String     @id @default(cuid())
+    pollId       String
+    pickedOption PollOption @relation(fields: [pollOptionId], references: [id])
+    createdAt    DateTime   @default(now())
+    updatedAt    DateTime   @updatedAt
+    pollOptionId String
 }
 
 model SurveyFeild {
@@ -144,18 +153,6 @@ model Survey {
     updatedAt      DateTime      @updatedAt
 }
 
-model Poll {
-    id             String       @id @default(cuid())
-    title          String
-    organizationId String
-    caseStudyId    String
-    PollFeild      PollFeild[]
-    caseStudy      CaseStudy    @relation(fields: [caseStudyId], references: [id], onDelete: Cascade)
-    organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-    createdAt      DateTime     @default(now())
-    updatedAt      DateTime     @updatedAt
-}
-
 model CaseStudy {
     id             String       @id @default(cuid())
     title          String
@@ -178,4 +175,9 @@ enum InviteStatus {
     PENDING
     ACCEPTED
     REJECTED
+}
+
+enum PollType {
+    MULTIPLE
+    SINGLE
 }
