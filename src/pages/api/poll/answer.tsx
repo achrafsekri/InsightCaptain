@@ -19,7 +19,7 @@ export default async function handler(
       const pollAnswer = await prisma.PollAnswer.create({
         data: {
           pollId: pollId as string,
-          pickedOption: pickedOption as string,
+          pollOptionId: pickedOption as string,
         },
       });
       res

@@ -17,22 +17,34 @@ export default async function handler(
   res: NextApiResponse
 ) {
   if (req.method === "GET") {
-    const { pollId } = req.query;
-    const poll = await prisma.Poll.findUnique({
-      where: {
-        id: pollId as string,
-      },
-      include: {
-        options: true,
-      },
-    });
+    try {
+      const { pollId } = req.query;
+      const poll = await prisma.Poll.findUnique({
+        where: {
+          id: pollId as string,
+        },
+        include: {
+          options: {
+            include: {
+              PollAnswers: true,
+            },
+          },
+        },
+      });
 
-    if (!poll) {
-      res.status(400).json(formatResponse(null, "Poll not found", "400"));
-    } else {
-      res
-        .status(200)
-        .json(formatResponse(poll, "Poll fetched successfully", "200"));
+      if (!poll) {
+        res.status(400).json(formatResponse(null, "Poll not found", "400"));
+      } else {
+        poll.options.map((option) => {
+          option.votes = option.PollAnswers.length;
+        });
+        res
+          .status(200)
+          .json(formatResponse(poll, "Poll fetched successfully", "200"));
+      }
+    } catch (err) {
+      console.error(err);
+      res.status(400).json(formatResponse(null, "error fetching poll", "400"));
     }
   }
 
