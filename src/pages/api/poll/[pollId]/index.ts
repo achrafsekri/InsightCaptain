@@ -3,6 +3,7 @@ import { authOptions } from "../../auth/[...nextauth]";
 import { getServerSession } from "next-auth/next";
 import { prisma } from "../../../../server/db";
 import { formatResponse } from "../../../../shared/sharedFunctions";
+import { Poll } from "@prisma/client";
 
 type PatchBody = {
   pollTitle: string;
@@ -19,7 +20,7 @@ export default async function handler(
   if (req.method === "GET") {
     try {
       const { pollId } = req.query;
-      const poll = await prisma.Poll.findUnique({
+      const poll: Poll = await prisma.Poll.findUnique({
         where: {
           id: pollId as string,
         },
@@ -38,6 +39,11 @@ export default async function handler(
         poll.options.map((option) => {
           option.votes = option.PollAnswers.length;
         });
+        poll.totalVotes = poll.options.reduce(
+          (acc, option) => acc + option.votes,
+          0
+        );
+
         res
           .status(200)
           .json(formatResponse(poll, "Poll fetched successfully", "200"));

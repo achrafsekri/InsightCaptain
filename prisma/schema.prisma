@@ -30,7 +30,8 @@ model Account {
     scope             String?
     id_token          String? @db.Text
     session_state     String?
-    user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+    user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
     @@unique([provider, providerAccountId])
 }
 
@@ -57,6 +58,7 @@ model VerificationToken {
     identifier String
     token      String   @unique
     expires    DateTime
+
     @@unique([identifier, token])
 }
 
@@ -110,13 +112,13 @@ model Poll {
 }
 
 model PollOption {
-    id              String       @id @default(cuid())
-    title           String
-    pollId          String
-    poll            Poll         @relation(fields: [pollId], references: [id], onDelete: Cascade)
-    createdAt       DateTime     @default(now())
-    updatedAt       DateTime     @updatedAt
-    PollAnswers     PollAnswer[]
+    id          String       @id @default(cuid())
+    title       String
+    pollId      String
+    poll        Poll         @relation(fields: [pollId], references: [id], onDelete: Cascade)
+    createdAt   DateTime     @default(now())
+    updatedAt   DateTime     @updatedAt
+    PollAnswers PollAnswer[]
 }
 
 model PollAnswer {
@@ -129,12 +131,49 @@ model PollAnswer {
 }
 
 model SurveyFeild {
-    id        String   @id @default(cuid())
-    title     String
-    surveyId  String
-    survey    Survey   @relation(fields: [surveyId], references: [id], onDelete: Cascade)
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+    id                  String              @id @default(cuid())
+    title               String
+    helperText          String?
+    type                SurveyFeildType     @default(TEXT)
+    surveyId            String
+    survey              Survey              @relation(fields: [surveyId], references: [id], onDelete: Cascade)
+    createdAt           DateTime            @default(now())
+    updatedAt           DateTime            @updatedAt
+    surveyFeildAnswer   SurveyFeildAnswer[]
+    surveyFeildAnswerId String?
+    surveyFeildOption   SurveyFeildOption[]
+}
+
+model SurveyFeildAnswer {
+    id             String              @id @default(cuid())
+    surveyFieldId  String
+    surveyField    String
+    answer         String
+    createdAt      DateTime            @default(now())
+    updatedAt      DateTime            @updatedAt
+    surveyFeild    SurveyFeild?        @relation(fields: [surveyFeildId], references: [id])
+    surveyAnswer   SurveyAnswer?       @relation(fields: [surveyAnswerId], references: [id])
+    surveyAnswerId String?
+    pickedOptions  SurveyFeildOption[]
+    surveyFeildId  String?
+}
+
+model SurveyFeildOption {
+    id             String              @id @default(cuid())
+    surveyFieldId  String
+    surveyField    SurveyFeild         @relation(fields: [surveyFieldId], references: [id], onDelete: Cascade)
+    title          String
+    createdAt      DateTime            @default(now())
+    updatedAt      DateTime            @updatedAt
+    SurveyFeildAns SurveyFeildAnswer[]
+}
+
+model SurveyAnswer {
+    id                String              @id @default(cuid())
+    surveyId          String
+    surveyFeildAnswer SurveyFeildAnswer[]
+    createdAt         DateTime            @default(now())
+    updatedAt         DateTime            @updatedAt
 }
 
 model Survey {
@@ -143,7 +182,7 @@ model Survey {
     description    String
     organizationId String
     caseStudyId    String
-    SurveyField    SurveyFeild[]
+    surveyField    SurveyFeild[]
     caseStudy      CaseStudy     @relation(fields: [caseStudyId], references: [id], onDelete: Cascade)
     organization   Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
     createdAt      DateTime      @default(now())
@@ -177,4 +216,10 @@ enum InviteStatus {
 enum PollType {
     MULTIPLE
     SINGLE
+}
+
+enum SurveyFeildType {
+    TEXT
+    RADIO
+    CHECKBOX
 }
