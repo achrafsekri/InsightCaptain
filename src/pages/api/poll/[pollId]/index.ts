@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import { authOptions } from "../../auth/[...nextauth]";
+
 import { getServerSession } from "next-auth/next";
 import { prisma } from "../../../../server/db";
 import { formatResponse } from "../../../../shared/sharedFunctions";
@@ -10,6 +10,8 @@ type PatchBody = {
   options: {
     id: string;
     title: string;
+    votes: number;
+    totalVotes: number;
   }[];
 };
 
@@ -20,7 +22,7 @@ export default async function handler(
   if (req.method === "GET") {
     try {
       const { pollId } = req.query;
-      const poll: Poll = await prisma.Poll.findUnique({
+      const poll = await prisma.poll.findUnique({
         where: {
           id: pollId as string,
         },
@@ -59,7 +61,7 @@ export default async function handler(
     const { pollTitle, options } = req.body as PatchBody;
     try {
       pollTitle &&
-        (await prisma.Poll.update({
+        (await prisma.poll.update({
           where: {
             id: pollId as string,
           },
@@ -69,14 +71,14 @@ export default async function handler(
         }));
 
       options?.map(async (option) => {
-        const optionExists = await prisma.PollOption.findUnique({
+        const optionExists = await prisma.pollOption.findUnique({
           where: {
             id: option.id,
           },
         });
 
         if (optionExists) {
-          await prisma.PollOption.update({
+          await prisma.pollOption.update({
             where: {
               id: option.id,
             },
@@ -98,7 +100,7 @@ export default async function handler(
   if (req.method === "DELETE") {
     const { pollId } = req.query;
     try {
-      await prisma.Poll.delete({
+      await prisma.poll.delete({
         where: {
           id: pollId as string,
         },

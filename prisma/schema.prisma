@@ -104,6 +104,7 @@ model Poll {
     pollType       PollType     @default(SINGLE)
     organizationId String
     caseStudyId    String
+    totalVotes     Int          @default(0)
     options        PollOption[]
     caseStudy      CaseStudy    @relation(fields: [caseStudyId], references: [id], onDelete: Cascade)
     organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
@@ -114,6 +115,7 @@ model Poll {
 model PollOption {
     id          String       @id @default(cuid())
     title       String
+    votes       Int          @default(0)
     pollId      String
     poll        Poll         @relation(fields: [pollId], references: [id], onDelete: Cascade)
     createdAt   DateTime     @default(now())
@@ -147,7 +149,6 @@ model SurveyFeild {
 model SurveyFeildAnswer {
     id             String              @id @default(cuid())
     surveyFieldId  String
-    surveyField    String
     answer         String
     createdAt      DateTime            @default(now())
     updatedAt      DateTime            @updatedAt

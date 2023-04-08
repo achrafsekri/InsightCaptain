@@ -1,5 +1,4 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import { authOptions } from "../auth/[...nextauth]";
 import { getServerSession } from "next-auth/next";
 import { prisma } from "../../../server/db";
 import { formatResponse } from "../../../shared/sharedFunctions";
@@ -16,10 +15,10 @@ export default async function handler(
   const { pickedOption, pollId } = req.body as RequestBody;
   if (req.method === "POST") {
     try {
-      const pollAnswer = await prisma.PollAnswer.create({
+      const pollAnswer = await prisma.pollAnswer.create({
         data: {
-          pollId: pollId as string,
-          pollOptionId: pickedOption as string,
+          pollId: pollId,
+          pollOptionId: pickedOption ,
         },
       });
       res
