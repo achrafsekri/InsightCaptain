@@ -10,6 +10,12 @@ import type {
 } from "@prisma/client";
 
 type expectedPostBody = {
+  fullName: string;
+  email?: string;
+  phoneNumber?: string;
+  age?: number;
+  ipAddress?: string;
+  location?: string;
   answer: {
     surveyFieldId: string;
     answer: string;
@@ -25,8 +31,14 @@ type SurveyAnswers = {
 
 type SurveyAnswerReturn = {
   id: string;
+  fullName: string | null;
+  email?: string | null;
+  phoneNumber?: string | null;
+  age?: number | null;
+  location?: string | null;
+  ipAddress?: string | null;
   surveyId: string;
-  surveyAnswers: SurveyFeildAnswer[];
+  surveyAnswers: (SurveyFeildAnswer | undefined)[];
 };
 
 export default async function handler(
@@ -35,7 +47,8 @@ export default async function handler(
 ) {
   if (req.method === "POST") {
     const { surveyId } = req.query;
-    const { answer } = req.body as expectedPostBody;
+    const { answer, email, fullName, phoneNumber, age, location, ipAddress } =
+      req.body as expectedPostBody;
     const SurveyAnswerReturn = {} as SurveyAnswerReturn;
 
     try {
@@ -52,6 +65,12 @@ export default async function handler(
       const surveyAnswer: SurveyAnswer = await prisma.surveyAnswer.create({
         data: {
           surveyId: surveyId as string,
+          email,
+          fullName,
+          phoneNumber,
+          age,
+          location: location,
+          ipAddress: ipAddress,
         },
       });
       const surveyAnswerFilling = await Promise.all(
@@ -70,7 +89,11 @@ export default async function handler(
               data: {
                 surveyAnswerId: surveyAnswer.id,
                 surveyFieldId: answer.surveyFieldId,
-                pickedOptions: answer.pickedOptions as SurveyFeildOption[],
+                pickedOptions: {
+                  connect: {
+                    id: answer?.pickedOptions[0],
+                  },
+                },
               },
             });
           }
@@ -79,6 +102,12 @@ export default async function handler(
       SurveyAnswerReturn.id = surveyAnswer.id;
       SurveyAnswerReturn.surveyId = surveyAnswer.surveyId;
       SurveyAnswerReturn.surveyAnswers = surveyAnswerFilling;
+      SurveyAnswerReturn.phoneNumber = surveyAnswer.phoneNumber;
+      SurveyAnswerReturn.email = surveyAnswer.email;
+      SurveyAnswerReturn.fullName = surveyAnswer.fullName;
+      SurveyAnswerReturn.age = surveyAnswer.age;
+      SurveyAnswerReturn.location = surveyAnswer.location;
+      SurveyAnswerReturn.ipAddress = surveyAnswer.ipAddress;
       return res
         .status(201)
         .json(formatResponse(SurveyAnswerReturn, "Success", "201"));

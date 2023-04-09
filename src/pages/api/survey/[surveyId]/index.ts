@@ -1,5 +1,4 @@
 import { NextApiRequest, NextApiResponse } from "next";
-// 
 import { getServerSession } from "next-auth/next";
 import { prisma } from "../../../../server/db";
 import { formatResponse } from "../../../../shared/sharedFunctions";
@@ -24,6 +23,7 @@ export default async function handler(
           surveyField: true,
         },
       });
+
       if (!getSurvey) {
         return res
           .status(404)

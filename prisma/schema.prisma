@@ -126,6 +126,8 @@ model PollOption {
 model PollAnswer {
     id           String     @id @default(cuid())
     pollId       String
+    location     String?
+    ipAddress    String?
     pickedOption PollOption @relation(fields: [pollOptionId], references: [id])
     createdAt    DateTime   @default(now())
     updatedAt    DateTime   @updatedAt
@@ -133,23 +135,22 @@ model PollAnswer {
 }
 
 model SurveyFeild {
-    id                  String              @id @default(cuid())
-    title               String
-    helperText          String?
-    type                SurveyFeildType     @default(TEXT)
-    surveyId            String
-    survey              Survey              @relation(fields: [surveyId], references: [id], onDelete: Cascade)
-    createdAt           DateTime            @default(now())
-    updatedAt           DateTime            @updatedAt
-    surveyFeildAnswer   SurveyFeildAnswer[]
-    surveyFeildAnswerId String?
-    surveyFeildOption   SurveyFeildOption[]
+    id                String              @id @default(cuid())
+    title             String
+    helperText        String?
+    type              SurveyFeildType     @default(TEXT)
+    surveyId          String
+    survey            Survey              @relation(fields: [surveyId], references: [id], onDelete: Cascade)
+    createdAt         DateTime            @default(now())
+    updatedAt         DateTime            @updatedAt
+    surveyFeildAnswer SurveyFeildAnswer[]
+    surveyFeildOption SurveyFeildOption[]
 }
 
 model SurveyFeildAnswer {
     id             String              @id @default(cuid())
     surveyFieldId  String
-    answer         String
+    answer         String?
     createdAt      DateTime            @default(now())
     updatedAt      DateTime            @updatedAt
     surveyFeild    SurveyFeild?        @relation(fields: [surveyFeildId], references: [id])
@@ -171,6 +172,12 @@ model SurveyFeildOption {
 
 model SurveyAnswer {
     id                String              @id @default(cuid())
+    email             String?
+    fullName          String?
+    phoneNumber       String?
+    age               Int?
+    location          String?
+    ipAddress         String?
     surveyId          String
     surveyFeildAnswer SurveyFeildAnswer[]
     createdAt         DateTime            @default(now())
@@ -181,6 +188,7 @@ model Survey {
     id             String        @id @default(cuid())
     title          String
     description    String
+    topic          String?
     organizationId String
     caseStudyId    String
     surveyField    SurveyFeild[]
