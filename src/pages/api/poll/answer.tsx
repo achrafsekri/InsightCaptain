@@ -21,7 +21,7 @@ export default async function handler(
         data: {
           pollId: pollId,
           pollOptionId: pickedOption,
-          location: location,
+          location: location?.toLowerCase(),
           ipAddress: ipAddress,
         },
       });

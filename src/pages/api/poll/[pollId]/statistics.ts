@@ -3,12 +3,16 @@ import { NextApiRequest, NextApiResponse } from "next";
 import { getServerSession } from "next-auth/next";
 import { prisma } from "../../../../server/db";
 import { formatResponse } from "../../../../shared/sharedFunctions";
-import { Poll } from "@prisma/client";
+import { Poll, PollAnswer } from "@prisma/client";
 
 type stats = {
   totalResponses?: number;
   totalOptions?: number;
   locationwithmostresponses?: string;
+};
+
+type locationwithmostresponses = {
+  [key: string]: number;
 };
 
 export default async function handler(
@@ -23,7 +27,7 @@ export default async function handler(
           id: String(pollId),
         },
         include: {
-          pollOption: true,
+          options: true,
         },
       });
       if (!getPoll) {
@@ -33,25 +37,27 @@ export default async function handler(
       }
 
       const getStats: stats = {};
-      const getResponses: Poll[] = (await prisma.poll.findMany({
+      const getResponses: PollAnswer[] = await prisma.pollAnswer.findMany({
         where: {
           pollId: String(pollId),
         },
         include: {
-          pollOption: true,
+          pickedOption: true,
         },
-      })) as Poll[];
+      });
 
       getStats.totalResponses = getResponses.length;
-      getStats.totalOptions = getPoll.pollOption.length;
-      const locationwithmostresponses = getResponses.reduce((acc, curr) => {
-        if (acc[curr.location]) {
-          acc[curr.location] += 1;
-        } else {
-          acc[curr.location] = 1;
-        }
-        return acc;
-      }, {} as { [key: string]: number });
+      getStats.totalOptions = getPoll.options.length;
+      const locationwithmostresponses: locationwithmostresponses =
+        getResponses.reduce((acc, curr) => {
+          if (curr.location === null) return acc;
+          if (acc[curr.location]) {
+            acc[curr.location] += 1;
+          } else {
+            acc[curr.location] = 1;
+          }
+          return acc;
+        }, {} as { [key: string]: number });
       locationwithmostresponses["null"] = 0; // if no location is provided
       getStats.locationwithmostresponses = Object.keys(
         locationwithmostresponses

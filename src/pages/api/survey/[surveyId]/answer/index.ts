@@ -2,6 +2,7 @@ import { NextApiRequest, NextApiResponse } from "next";
 import { getServerSession } from "next-auth/next";
 import { prisma } from "../../../../../server/db";
 import { formatResponse } from "../../../../../shared/sharedFunctions";
+
 import type {
   Survey,
   SurveyAnswer,
@@ -18,8 +19,12 @@ type expectedPostBody = {
   location?: string;
   answer: {
     surveyFieldId: string;
-    answer: string;
-    pickedOptions?: SurveyFeildOption[];
+    surveiFieldTitle: string;
+    answer?: string;
+    pickedOptions?: {
+      id: string;
+      pickedOptionLable: string;
+    }[];
     type: string;
   }[];
 };
@@ -39,6 +44,34 @@ type SurveyAnswerReturn = {
   ipAddress?: string | null;
   surveyId: string;
   surveyAnswers: (SurveyFeildAnswer | undefined)[];
+};
+
+const getFormattedAnswer = (answers: any) => {
+  const reternedAnswer = answers.map((answer: any) => {
+    if (answer.type === "radio") {
+      return {
+        quotation: answer.surveyFieldTitle,
+        pickedOptions: answer.pickedOptions.map(
+          (option: any) => option.pickedOptionLable
+        ),
+      };
+    }
+    if (answer.type === "checkbox") {
+      return {
+        quotation: answer.surveyFieldTitle,
+        pickedOptions: answer.pickedOptions.map(
+          (option: any) => option.pickedOptionLable
+        ),
+      };
+    }
+    if (answer.type === "text") {
+      return {
+        quotation: answer.surveyFieldTitle,
+        answer: answer.answer,
+      };
+    }
+  });
+  return reternedAnswer;
 };
 
 export default async function handler(
@@ -73,6 +106,8 @@ export default async function handler(
           ipAddress: ipAddress,
         },
       });
+      const GptFormattedAnswer = getFormattedAnswer(answer);
+      console.log(GptFormattedAnswer);
       const surveyAnswerFilling = await Promise.all(
         answer.map(async (answer) => {
           if (answer.type === "text") {
@@ -91,8 +126,19 @@ export default async function handler(
                 surveyFieldId: answer.surveyFieldId,
                 pickedOptions: {
                   connect: {
-                    id: answer?.pickedOptions[0],
+                    id: answer?.pickedOptions[0].id,
                   },
+                },
+              },
+            });
+          }
+          if (answer.type === "checkbox") {
+            return await prisma.surveyFeildAnswer.create({
+              data: {
+                surveyAnswerId: surveyAnswer.id,
+                surveyFieldId: answer.surveyFieldId,
+                pickedOptions: {
+                  connect: answer?.pickedOptions?.map((option) => option.id),
                 },
               },
             });

@@ -22,7 +22,9 @@ export default async function handler(
     const { title, caseStudyId, organizationId, pollOptions } =
       req.body as expectedBody;
 
-    const poll = await prisma.Poll.create({
+    console.log(req.body);
+
+    const poll = await prisma.poll.create({
       data: {
         options: {
           create: pollOptions,
