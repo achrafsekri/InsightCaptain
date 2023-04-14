@@ -2,6 +2,7 @@ import { NextApiRequest, NextApiResponse } from "next";
 import { getServerSession } from "next-auth/next";
 import { prisma } from "../../../../../server/db";
 import { formatResponse } from "../../../../../shared/sharedFunctions";
+import axios from "axios";
 
 import type {
   Survey,
@@ -17,16 +18,7 @@ type expectedPostBody = {
   age?: number;
   ipAddress?: string;
   location?: string;
-  answer: {
-    surveyFieldId: string;
-    surveiFieldTitle: string;
-    answer?: string;
-    pickedOptions?: {
-      id: string;
-      pickedOptionLable: string;
-    }[];
-    type: string;
-  }[];
+  answer: Answer;
 };
 
 type SurveyAnswers = {
@@ -46,22 +38,40 @@ type SurveyAnswerReturn = {
   surveyAnswers: (SurveyFeildAnswer | undefined)[];
 };
 
-const getFormattedAnswer = (answers: any) => {
-  const reternedAnswer = answers.map((answer: any) => {
-    if (answer.type === "radio") {
+type FormattedAnswer = {
+  quotation: string;
+  answer?: string;
+}[];
+
+type Answer = {
+  surveyFieldId: string;
+  surveyFieldTitle: string;
+  answer?: string;
+  pickedOptions?: {
+    id: string;
+    pickedOptionLable: string;
+  }[];
+  type: string;
+}[];
+
+type Sentiment = {
+  result: string;
+  requests: string[];
+};
+
+// getFormattedAnswer is a function that formats the answer to the format that GPT-3 expects
+const getFormattedAnswer = (answers: Answer) => {
+  const reternedAnswer = answers.map((answer) => {
+    if (answer.type === "radio" && answer.pickedOptions?.length === 1) {
       return {
         quotation: answer.surveyFieldTitle,
-        pickedOptions: answer.pickedOptions.map(
-          (option: any) => option.pickedOptionLable
-        ),
+        answer: answer.pickedOptions.map((option) => option.pickedOptionLable),
       };
     }
-    if (answer.type === "checkbox") {
+    if (answer.type === "checkbox" && answer.pickedOptions) {
       return {
         quotation: answer.surveyFieldTitle,
-        pickedOptions: answer.pickedOptions.map(
-          (option: any) => option.pickedOptionLable
-        ),
+        answer: answer.pickedOptions.map((option) => option.pickedOptionLable),
       };
     }
     if (answer.type === "text") {
@@ -70,7 +80,7 @@ const getFormattedAnswer = (answers: any) => {
         answer: answer.answer,
       };
     }
-  });
+  }) as FormattedAnswer;
   return reternedAnswer;
 };
 
@@ -95,19 +105,41 @@ export default async function handler(
           .status(404)
           .json(formatResponse(null, "Survey not found", "404"));
       }
+
+      // get sentiment analysis of the answer and most requested topics and save it to the database for future use
+      const GptFormattedAnswer = JSON.stringify(getFormattedAnswer(answer));
+      const data = JSON.stringify({
+        answer: GptFormattedAnswer,
+      });
+      const SentimentAnalysis = await axios.get(
+        "http://localhost:3000/api/gpt/sentiment",
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+          data: data,
+        }
+      );
+
+      const sentiment = SentimentAnalysis.data.data as Sentiment;
+
+      console.log("sentiment", sentiment.result[0]);
+
+      // save the answer to the database
       const surveyAnswer: SurveyAnswer = await prisma.surveyAnswer.create({
         data: {
           surveyId: surveyId as string,
           email,
           fullName,
+          sentiment: sentiment.result[0]?.toUpperCase(),
+          requested: sentiment.requests.join(", "),
           phoneNumber,
           age,
           location: location,
           ipAddress: ipAddress,
         },
       });
-      const GptFormattedAnswer = getFormattedAnswer(answer);
-      console.log(GptFormattedAnswer);
+
       const surveyAnswerFilling = await Promise.all(
         answer.map(async (answer) => {
           if (answer.type === "text") {
@@ -119,7 +151,7 @@ export default async function handler(
               },
             });
           }
-          if (answer.type === "radio") {
+          if (answer.type === "radio" && answer.pickedOptions?.length === 1) {
             return await prisma.surveyFeildAnswer.create({
               data: {
                 surveyAnswerId: surveyAnswer.id,
@@ -132,13 +164,15 @@ export default async function handler(
               },
             });
           }
-          if (answer.type === "checkbox") {
+          if (answer.type === "checkbox" && answer.pickedOptions) {
             return await prisma.surveyFeildAnswer.create({
               data: {
                 surveyAnswerId: surveyAnswer.id,
                 surveyFieldId: answer.surveyFieldId,
                 pickedOptions: {
-                  connect: answer?.pickedOptions?.map((option) => option.id),
+                  connect: answer?.pickedOptions.map((option) => ({
+                    id: option.id,
+                  })),
                 },
               },
             });

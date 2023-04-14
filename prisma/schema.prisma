@@ -178,6 +178,8 @@ model SurveyAnswer {
     age               Int?
     location          String?
     ipAddress         String?
+    sentiment         Sentiment           @default(NEUTRAL)
+    requested         String?
     surveyId          String
     surveyFeildAnswer SurveyFeildAnswer[]
     createdAt         DateTime            @default(now())
@@ -231,4 +233,10 @@ enum SurveyFeildType {
     TEXT
     RADIO
     CHECKBOX
+}
+
+enum Sentiment {
+    NEUTRAL
+    POSITIVE
+    NEGATIVE
 }
