@@ -58,11 +58,11 @@ export default async function handler(
                 max_tokens: 2048,
             });
 
-            const result=completion?.data
-            console.log(result)
-            res.status(200).json({ result });
+    const result=completion?.data
+    console.log(result)
+    return res.status(200).json({ result });
 
-    } catch (err) {res.status(500).json(formatResponse(null, "Prompt sending or reception went wrong ", "500"));}
+        } catch (err) {res.status(500).json(formatResponse(null, "Prompt sending or reception went wrong ", "500"));}
 
         } catch (err) {
             console.error(err);
