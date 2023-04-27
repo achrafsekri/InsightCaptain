@@ -15,6 +15,8 @@ import {
 } from "@tremor/react";
 import { useCaseStudy } from "../../../Context/CaseStudyContext";
 import Link from "next/link";
+import { useState } from "react";
+import AddCaseStudyModal from "./AddCaseStudyModal";
 
 const transactions = [
   {
@@ -77,8 +79,15 @@ const transactions = [
 
 export default function CaseStudiesTable() {
   const { caseStudies } = useCaseStudy();
+  const [OpenAddCasestudyModale, setOpenAddCasestudyModale] = useState(false);
   return (
     <Card>
+      {OpenAddCasestudyModale && (
+        <AddCaseStudyModal
+          isOpen={OpenAddCasestudyModale}
+          setIsOpen={setOpenAddCasestudyModale}
+        />
+      )}
       <div className="flex items-center justify-between">
         <div>
           <Flex justifyContent="start" className="space-x-2">
@@ -87,7 +96,12 @@ export default function CaseStudiesTable() {
           </Flex>
           <Text className="mt-2">Overview of your case Studies</Text>
         </div>
-        <Button size="xs" variant="primary" color="blue">
+        <Button
+          size="xs"
+          variant="primary"
+          color="blue"
+          onClick={() => setOpenAddCasestudyModale(true)}
+        >
           Add case study
         </Button>
       </div>

@@ -27,9 +27,9 @@ export default function Navbar({ user }: { user: any }) {
                   <Logo />
                 </div>
                 <div className="hidden sm:-my-px sm:ml-6 sm:flex sm:space-x-8">
-                  {routes.map((item) => (
+                  {routes.map((item, index) => (
                     <a
-                      key={item.lable}
+                      key={index}
                       href={item.href}
                       className={classNames(
                         pathname === item.href
@@ -116,9 +116,9 @@ export default function Navbar({ user }: { user: any }) {
 
           <Disclosure.Panel className="sm:hidden">
             <div className="space-y-1 pt-2 pb-3">
-              {routes.map((item) => (
+              {routes.map((item, index) => (
                 <Disclosure.Button
-                  key={item.name}
+                  key={index}
                   as="a"
                   href={item.href}
                   className={classNames(

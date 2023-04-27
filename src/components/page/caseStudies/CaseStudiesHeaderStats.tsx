@@ -2,6 +2,7 @@ import React from "react";
 import { Card, Metric, Text, Flex, Grid, Title, BarList } from "@tremor/react";
 import CaseStudiesTable from "./CaseStudiesTable";
 
+
 const categories: {
   title: string;
   metric: string;
@@ -25,6 +26,7 @@ const categories: {
 ];
 
 const CaseStudiesHeaderStats = () => {
+
   return (
     <main className="mx-auto max-w-7xl p-4 md:p-10">
       <>
