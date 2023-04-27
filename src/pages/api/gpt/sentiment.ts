@@ -6,6 +6,8 @@ type IncommingPrompt = {
   answer: string;
 };
 
+
+
 const generatePrompt = (prompt: string) => {
   return `Given this survey answer ${prompt}, please provide a sentiment analysis by selecting one of these options: [negative, positive, neutral]. return a JSON object with the following structure: { "result": [sentiment analysis result], "requests": [requested phrases from answers] }. only return the JSON object and nothing else. `;
 };
@@ -14,7 +16,7 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-    //!change this to the url of the website that will be using this api
+  //!change this to the url of the website that will be using this api
   res.setHeader(
     "Access-Control-Allow-Origin",
     "https://explain-this.vercel.app"

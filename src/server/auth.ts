@@ -10,6 +10,7 @@ import { env } from "../env.mjs";
 import { prisma } from "./db";
 import GoogleProvider from "next-auth/providers/google";
 import EmailProvider from "next-auth/providers/email";
+import { userOrganization, type Organization } from "@prisma/client";
 
 /**
  * Module augmentation for `next-auth` types.
@@ -40,11 +41,13 @@ declare module "next-auth" {
 export const authOptions: NextAuthOptions = {
   callbacks: {
     session({ session, user }) {
+      console.log("user auth", user);
       if (session.user) {
+        console.log("user", user);
         session.user.id = user.id;
         session.user.name = user.name;
         session.user.image = user.image;
-        //  put other properties on the session here
+        session.user.organizations = user.organizations as userOrganization[];
       }
       return session;
     },

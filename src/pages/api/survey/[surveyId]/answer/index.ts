@@ -36,6 +36,8 @@ type SurveyAnswerReturn = {
   ipAddress?: string | null;
   surveyId: string;
   surveyAnswers: (SurveyFeildAnswer | undefined)[];
+  requested?: string | null;
+  sentiment?: string | null;
 };
 
 type FormattedAnswer = {
@@ -188,6 +190,9 @@ export default async function handler(
       SurveyAnswerReturn.age = surveyAnswer.age;
       SurveyAnswerReturn.location = surveyAnswer.location;
       SurveyAnswerReturn.ipAddress = surveyAnswer.ipAddress;
+      SurveyAnswerReturn.requested = surveyAnswer.requested;
+      SurveyAnswerReturn.sentiment = surveyAnswer.sentiment;
+      
       return res
         .status(201)
         .json(formatResponse(SurveyAnswerReturn, "Success", "201"));

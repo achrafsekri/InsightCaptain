@@ -20,5 +20,11 @@ const config = {
     locales: ["en"],
     defaultLocale: "en",
   },
+  images: {
+    domains: ["avatar.vercel.sh"],
+  },
+  experimental: {
+    serverComponentsExternalPackages: ["@tremor/react"],
+  },
 };
 export default config;

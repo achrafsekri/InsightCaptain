@@ -4,10 +4,17 @@ import { prisma } from "../../../../server/db";
 import { formatResponse } from "../../../../shared/sharedFunctions";
 import type { Survey, SurveyAnswer } from "@prisma/client";
 
+enum Sentiment {
+  Positive = "Positive",
+  Negative = "Negative",
+  Neutral = "Neutral",
+}
+
 type stats = {
   totalResponses?: number;
   totalQuestions?: number;
   locationwithmostresponses?: string;
+  sentiment?: Sentiment;
 };
 
 export default async function handler(
@@ -57,6 +64,19 @@ export default async function handler(
       ).reduce((a, b) =>
         locationwithmostresponses[a] > locationwithmostresponses[b] ? a : b
       );
+
+      const sentiment = getResponses.reduce((acc, curr) => {
+        if (acc[curr.sentiment]) {
+          acc[curr.sentiment] += 1;
+        } else {
+          acc[curr.sentiment] = 1;
+        }
+        return acc;
+      }, {} as { [key: string]: number });
+      sentiment["null"] = 0; // if no sentiment is provided
+      getStats.sentiment = Object.keys(sentiment).reduce((a, b) =>
+        sentiment[a] > sentiment[b] ? a : b
+      ) as Sentiment;
 
       return res.status(200).json(formatResponse(getStats, "Success", "201"));
     } catch {

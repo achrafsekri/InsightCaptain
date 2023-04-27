@@ -3,6 +3,9 @@ import { getServerSession } from "next-auth/next";
 import { prisma } from "../../../../../../server/db";
 import { formatResponse } from "../../../../../../shared/sharedFunctions";
 import type { Poll, Survey } from "@prisma/client";
+import { promise } from "zod";
+import { baseUrl } from "../../../../../../shared/constants";
+import axios from "axios";
 
 type caseStudyStats = {
   numberOfPolls: number;
@@ -35,17 +38,25 @@ export default async function handler(
           .json(formatResponse(null, "Case study not found", "404"));
       }
 
-     
-
       const getStats: caseStudyStats = {
         numberOfPolls: getCaseStudy.polls.length,
         numberOfSurveys: getCaseStudy.surveys.length,
-        numberOfPollResponses: 0,
-        numberOfSurveyResponses: 0,
         mostPopularPoll: null,
         mostPopularSurvey: null,
       };
 
+      const getPollStats = await Promise.all(
+        getCaseStudy.polls.map(async (poll) => {
+          
+          const pollStats = await axios.get(
+            `${baseUrl}/api/poll/${poll.id}/statistics`
+          );
+
+          console.log("pollStats", pollStats)
+          return pollStats;
+        })
+      );
+console.log(getPollStats)
       return res
         .status(200)
         .json(formatResponse(getStats, "Poll stats", "200"));
