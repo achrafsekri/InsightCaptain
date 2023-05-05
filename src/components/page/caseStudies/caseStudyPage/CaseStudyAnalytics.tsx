@@ -17,7 +17,7 @@ import Performance from "./Performance";
 import { MdArrowOutward } from "react-icons/md";
 import { useRouter } from "next/router";
 import Link from "next/link";
-import Keywords from "./Keywords";
+import Keywords from "../../../global/Keywords";
 
 const CaseStudyAnalytics = () => {
   const route = useRouter();

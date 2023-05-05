@@ -3,7 +3,7 @@ import {
   Title,
   LineChart,
   DateRangePicker,
-  DateRangePickerValue,
+  type DateRangePickerValue,
 } from "@tremor/react";
 import { es } from "date-fns/locale";
 import React, { useState } from "react";

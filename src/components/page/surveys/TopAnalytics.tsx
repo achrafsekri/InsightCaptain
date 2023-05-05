@@ -1,6 +1,8 @@
 import { Card, Title, Text, Grid } from "@tremor/react";
 import React from "react";
 import SurveyeesChart from "./SurveyeesChart";
+import ListChart from "../../global/ListChart";
+import AgeGroupListChart from "../../global/AgeGroupListChart";
 
 const TopAnalytics = () => {
   return (
@@ -16,12 +18,10 @@ const TopAnalytics = () => {
       {/* KPI section */}
       <Grid numColsMd={2} className="mt-6 gap-6">
         <Card>
-          {/* Placeholder to set height */}
-          <div className="h-28" />
+          <ListChart type="surveys" />
         </Card>
         <Card>
-          {/* Placeholder to set height */}
-          <div className="h-28" />
+          <AgeGroupListChart type="surveys" />
         </Card>
       </Grid>
     </>
