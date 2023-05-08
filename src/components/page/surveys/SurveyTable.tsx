@@ -130,8 +130,8 @@ const SurveyTable = () => {
       <Table className="mt-6">
         <TableHead>
           <TableRow>
-            <TableHeaderCell>Survey Id</TableHeaderCell>
             <TableHeaderCell>Name</TableHeaderCell>
+            <TableHeaderCell>Case study</TableHeaderCell>
             <TableHeaderCell>N° respondants</TableHeaderCell>
             <TableHeaderCell>Link</TableHeaderCell>
             <TableHeaderCell>Action</TableHeaderCell>
@@ -141,8 +141,8 @@ const SurveyTable = () => {
         <TableBody>
           {filteredSurveys.map((item, index) => (
             <TableRow key={index}>
-              <TableCell>{index + 1}</TableCell>
               <TableCell>{item.title}</TableCell>
+              <TableCell>{index + 1}</TableCell>
               <TableCell>{item.numberOfRespondats}</TableCell>
 
               <TableCell>
