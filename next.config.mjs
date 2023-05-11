@@ -25,6 +25,7 @@ const config = {
   },
   experimental: {
     serverComponentsExternalPackages: ["@tremor/react"],
+    esmExternals: false,
   },
 };
 export default config;

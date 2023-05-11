@@ -6,7 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import Loading from "../components/global/loading";
 
 interface User {
-  id: number;
+  id: string;
   name: string;
   email: string;
   image: string;

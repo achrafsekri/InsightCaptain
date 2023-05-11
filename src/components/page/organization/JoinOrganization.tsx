@@ -5,6 +5,8 @@ import { Button } from "primereact/button";
 import { BiArrowBack } from "react-icons/bi";
 import { classNames } from "primereact/utils";
 import Image from "next/image";
+import { joinOrganization } from "../../../lib/apiCalls";
+import { useUser } from "../../../auth/UserContext";
 
 type FormValues = {
   code: string;
@@ -27,6 +29,7 @@ const resolver: Resolver<FormValues> = async (values) => {
 const JoinOrganization = ({ setStep }) => {
   const [avatar, setAvatar] = React.useState<File | null>(null);
   const [loading, setLoading] = React.useState(false);
+  const { user } = useUser();
   const {
     register,
     handleSubmit,
@@ -42,11 +45,17 @@ const JoinOrganization = ({ setStep }) => {
     );
   };
   const onSubmit = handleSubmit((data) => {
-    console.log(data);
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-    }, 2000);
+    //? add toast bar and redirect to dashboard
+    joinOrganization(data.code, user?.id)
+      .then((res) => {
+        console.log(res);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.log(err);
+        setLoading(false);
+      });
   });
   return (
     <div className="relative h-full w-full px-12 py-6">
@@ -61,13 +70,13 @@ const JoinOrganization = ({ setStep }) => {
         onSubmit={onSubmit}
         className=" flex h-full w-full  items-center justify-center  "
       >
-        <div className="flex gap-8 items-end">
+        <div className="flex items-end gap-8">
           <Controller
             name="code"
             control={control}
             rules={{ required: "Value is required." }}
             render={({ field, fieldState }) => (
-              <div className="flex flex-col gap-2 -mb-8">
+              <div className="-mb-8 flex flex-col gap-2">
                 <small className="w-72 items-start text-sm italic">
                   * Please enter the invitation code provided by your
                   organization.
@@ -85,7 +94,7 @@ const JoinOrganization = ({ setStep }) => {
             )}
           />
 
-          <div className="flex justify-end h-10 gap-4 ">
+          <div className="flex h-10 justify-end gap-4 ">
             <Button
               label="Join"
               type="submit"

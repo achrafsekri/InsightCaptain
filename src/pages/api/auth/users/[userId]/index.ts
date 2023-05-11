@@ -1,7 +1,7 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { getServerSession } from "next-auth/next";
-import { prisma } from "../../../../server/db";
-import { formatResponse } from "../../../../shared/sharedFunctions";
+import { prisma } from "../../../../../server/db";
+import { formatResponse } from "../../../../../shared/sharedFunctions";
 import { User } from "@prisma/client";
 
 export default async function handler(
@@ -10,16 +10,20 @@ export default async function handler(
 ) {
   if (req.method === "GET") {
     const { userId } = req.query;
-    console.log(userId)
+    console.log(userId);
     const user = await prisma.user.findUnique({
       where: {
         id: String(userId),
       },
       include: {
-        organizations: true,
+        organizations: {
+          include: {
+            organization: true,
+          },
+        },
       },
-    }) 
-console.log(user)
+    });
+    console.log(user);
     if (!user) {
       res.status(404).json(formatResponse(null, "User not found", "404"));
       return;

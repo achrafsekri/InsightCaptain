@@ -1,6 +1,5 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import { SessionContextValue, useSession } from "next-auth/react";
-import type { userOrganization } from "@prisma/client";
+
 import { getCaseStudies } from "../lib/apiCalls";
 import { useQuery } from "@tanstack/react-query";
 import Loading from "../components/global/loading";
@@ -11,10 +10,11 @@ interface CaseStudyContextType {
   caseStudies: CaseStudy | null;
   refetch: () => void;
 }
+type Value = CaseStudyContextType;
 
 export const CaseStudyContext = createContext({
   caseStudies: null,
-  refetch: () => {},
+  refetch: void 0,
 });
 
 export const CaseStudyProvider: React.FC = ({
@@ -29,7 +29,7 @@ export const CaseStudyProvider: React.FC = ({
     isError,
     refetch,
   } = useQuery(["caseStudies"], () =>
-    getCaseStudies(user.user.organizations[0].organizationId as string)
+    getCaseStudies(user.user.organizations[0]?.organizationId as string)
   );
 
   if (isLoading) {

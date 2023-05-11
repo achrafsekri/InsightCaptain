@@ -6,6 +6,13 @@ import { BiArrowBack } from "react-icons/bi";
 import { Ripple } from "primereact/ripple";
 import { classNames } from "primereact/utils";
 import Image from "next/image";
+import { UploadImage } from "./UploadImage";
+import { generateReactHelpers } from "@uploadthing/react";
+import type { OurFileRouter } from "../../../server/uploadthing";
+import { Icon } from "@tremor/react";
+import { TrashIcon } from "@heroicons/react/outline";
+import { createOrganization } from "../../../lib/apiCalls";
+import { useUser } from "../../../auth/UserContext";
 
 type FormValues = {
   avatar: string;
@@ -25,10 +32,20 @@ const resolver: Resolver<FormValues> = async (values) => {
       : {},
   };
 };
+const { useUploadThing } = generateReactHelpers<OurFileRouter>();
 
 const CreateOrganization = ({ setStep }) => {
+  const { user } = useUser();
   const [avatar, setAvatar] = React.useState<File | null>(null);
-  const [loading, setLoading] = React.useState(false);
+  const [loading, setLoading] = React.useState<boolean>(false);
+  const {
+    getRootProps,
+    getInputProps,
+    isDragActive,
+    resetFiles,
+    files,
+    startUpload,
+  } = useUploadThing("imageUploader");
   const {
     register,
     handleSubmit,
@@ -36,7 +53,7 @@ const CreateOrganization = ({ setStep }) => {
     formState: { errors },
   } = useForm<FormValues>({ resolver });
 
-  const getFormErrorMessage = (name) => {
+  const getFormErrorMessage = (name: string) => {
     return errors[name] ? (
       <small className="p-error">{errors[name].message}</small>
     ) : (
@@ -44,16 +61,31 @@ const CreateOrganization = ({ setStep }) => {
     );
   };
   const onSubmit = handleSubmit((data) => {
-    console.log(data);
+    startUpload()
+      .then((res) => {
+        const sendData = {
+          name: data.name,
+          image: typeof(res[0]) !== "undefined" ? res[0].fileUrl : "",
+          userId: user?.id,
+        };
+        createOrganization(sendData)
+          .then((res) => console.log(res))
+          .catch((err) => {
+            console.log(err);
+          });
+      })
+      .catch((err) => {
+        console.log(err);
+      });
     setLoading(true);
     setTimeout(() => {
       setLoading(false);
     }, 2000);
   });
   return (
-    <div className="h-full relative w-full px-12 py-6">
+    <div className="relative h-full w-full px-12 py-6">
       <Button
-        className="left-6 font-smibold  items-center text-sm flex z-50 absolute top-6 hover:opacity-80*"
+        className="font-smibold hover:opacity-80*  absolute left-6 top-6 z-50 flex items-center text-sm"
         text
         onClick={() => setStep("pick")}
       >
@@ -64,80 +96,39 @@ const CreateOrganization = ({ setStep }) => {
         className="relative flex h-full w-full flex-col items-center justify-center"
       >
         <div className="flex  w-full items-center justify-center gap-6">
-          <Controller
-            control={control}
-            name="avatar"
-            render={({ field: { onChange, value } }) => (
-              <div className="relative flex h-28 w-28 items-center justify-center overflow-hidden rounded-lg p-2">
-                <div className="absolute inset-0 z-10 bg-black bg-opacity-30" />
-                <div className=" z-20 flex items-center justify-center p-5">
-                  <div>
-                    <label
-                      htmlFor="button-avatar"
-                      className="flex cursor-pointer p-4 "
-                    >
-                      <input
-                        accept="image/*"
-                        className="hidden"
-                        id="button-avatar"
-                        type="file"
-                        onChange={async (e) => {
-                          function readFileAsync() {
-                            return new Promise((resolve, reject) => {
-                              const file = e.target.files[0];
-                              setAvatar(file);
-                              if (!file) {
-                                return;
-                              }
-                              const reader = new FileReader();
-
-                              reader.onload = () => {
-                                resolve(
-                                  `data:${file.type};base64,${btoa(
-                                    reader.result
-                                  )}`
-                                );
-                              };
-
-                              reader.onerror = reject;
-
-                              reader.readAsBinaryString(file);
-                            });
-                          }
-
-                          const newImage = await readFileAsync();
-
-                          onChange(newImage);
-                        }}
-                      />
-                      <i className="pi pi-upload text-white " />
-                      <Ripple />
-                    </label>
-                  </div>
-
-                  <Button
-                    icon="pi pi-trash"
-                    onClick={() => {
-                      setAvatar(null);
-                      onChange("");
-                    }}
-                    text
-                    severity="danger"
-                  />
-                </div>
-
-                {!!value && (
-                  <Image
-                    src={value}
-                    className="absolute inset-0 m-auto"
-                    width={80}
-                    height={80}
-                    alt="organization avatar"
-                  />
-                )}
-              </div>
-            )}
-          />
+          <div
+            {...getRootProps()}
+            className="relative flex h-28 w-28 items-center justify-center  rounded-lg border-2 border-dashed p-2"
+          >
+            <input {...getInputProps()} />
+            <div>
+              {files.length > 0 && (
+                <Image
+                  src={files[0].contents}
+                  alt="Image"
+                  width="80"
+                  height="60"
+                />
+              )}
+              {files.length > 0 && (
+                <Icon
+                  className="absolute -top-2 -right-2 cursor-pointer"
+                  icon={TrashIcon}
+                  onClick={() => resetFiles()}
+                  variant="solid"
+                  color="red"
+                  size="xs"
+                  tooltip="Remove image"
+                />
+              )}
+              {files.length === 0 && (
+                <p className="text-center text-gray-500">
+                  Drag and drop an image here
+                </p>
+              )}
+              <Ripple />
+            </div>
+          </div>
           <Controller
             name="name"
             control={control}

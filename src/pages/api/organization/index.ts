@@ -3,6 +3,12 @@ import { getServerSession } from "next-auth/next";
 import { prisma } from "../../../server/db";
 import { formatResponse } from "../../../shared/sharedFunctions";
 
+type ReqBody = {
+  name: string;
+  image: string;
+  userId: string;
+};
+
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
@@ -11,7 +17,7 @@ export default async function handler(
     return res.status(405).json({ message: "Method not allowed" });
   }
   try {
-    const { name } = req.body;
+    const { name, image, userId } = req.body as ReqBody;
     // const session = await getServerSession(req, res, authOptions);
     //   if (!session) {
     //     res.status(401).json({ message: "You must be logged in." });
@@ -20,8 +26,17 @@ export default async function handler(
     const addOrganization = await prisma.organization.create({
       data: {
         name,
+        image,
       },
     });
+    addOrganization &&
+      (await prisma.userOrganization.create({
+        data: {
+          userId,
+          role: "OWNER",
+          organizationId: addOrganization.id,
+        },
+      }));
     return res
       .status(200)
       .json(formatResponse(addOrganization, "Success", "OK"));
