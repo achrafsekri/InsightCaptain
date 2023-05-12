@@ -11,9 +11,11 @@ import "primeicons/primeicons.css";
 import OrganizationWrapper from "../auth/OrganizationWrapper";
 import Providers from "../Context/Providers";
 import PrimeReact from "primereact/api";
-import 'primereact/resources/themes/saga-blue/theme.css';
-import 'primereact/resources/primereact.min.css';
-import 'primeicons/primeicons.css';
+import "primereact/resources/themes/saga-blue/theme.css";
+import "primereact/resources/primereact.min.css";
+import "primeicons/primeicons.css";
+import { publicRoutes } from "../shared/constants";
+import { useRouter } from "next/router";
 
 const MyApp: AppType<{ session: Session | null }> = ({
   Component,
@@ -22,18 +24,24 @@ const MyApp: AppType<{ session: Session | null }> = ({
   PrimeReact.appendTo = "self";
   PrimeReact.ripple = true;
   const queryClient = new QueryClient();
+  const router = useRouter();
   return (
     <SessionProvider session={session}>
       <QueryClientProvider client={queryClient}>
         <AuthWrapper>
-          <UserProvider>
-            <OrganizationWrapper>
-              <Providers>
-                <Component {...pageProps} />
-                <ReactQueryDevtools initialIsOpen={false} />
-              </Providers>
-            </OrganizationWrapper>
-          </UserProvider>
+          {!publicRoutes.includes(router.pathname) && (
+            <UserProvider>
+              <OrganizationWrapper>
+                <Providers>
+                  <Component {...pageProps} />
+                  <ReactQueryDevtools initialIsOpen={false} />
+                </Providers>
+              </OrganizationWrapper>
+            </UserProvider>
+          )}
+          {publicRoutes.includes(router.pathname) && (
+            <Component {...pageProps} />
+          )}
         </AuthWrapper>
       </QueryClientProvider>
     </SessionProvider>

@@ -65,15 +65,30 @@ const SwitchOrganizationModal = ({ isOpen, setIsOpen }: Props) => {
                     (organization: userOrganization, index: number) => (
                       <button
                         key={index}
-                        onClick={(e) => setOrganization(organization.organization)}
+                        onClick={(e) =>
+                          setOrganization(organization.organization)
+                        }
                         className="p-link mb-2 flex w-full items-center rounded-md border-2 border-gray-800 p-2"
                       >
                         {/* //! need to add pic */}
-                        <Avatar
-                          image="https://primefaces.org/cdn/primereact/images/avatar/amyelsner.png"
-                          className="mr-2"
-                          shape="circle"
-                        />
+                        {organization.organization.image && (
+                          <Avatar
+                            image={organization.organization.image}
+                            className="mr-2"
+                            shape="circle"
+                          />
+                        )}
+                        {!organization.organization.image && (
+                          <Avatar
+                            label={organization.organization.name[0].toUpperCase()}
+                            style={{
+                              backgroundColor: "#2196F3",
+                              color: "#ffffff",
+                            }}
+                            className="mr-2"
+                            shape="circle"
+                          />
+                        )}
                         <div className="align flex flex-col">
                           <span className="font-bold">
                             {organization.organization.name}
