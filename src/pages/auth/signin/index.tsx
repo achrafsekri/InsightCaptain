@@ -2,19 +2,28 @@ import type {
   GetServerSidePropsContext,
   InferGetServerSidePropsType,
 } from "next";
-import { getCsrfToken } from "next-auth/react";
+import { getCsrfToken, useSession } from "next-auth/react";
 import { Button } from "@tremor/react";
 import { Checkbox } from "primereact/checkbox";
 import { InputText } from "primereact/inputtext";
 import Logo from "../../../shared/Logo";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Avatar } from "primereact/avatar";
 import { AvatarGroup } from "primereact/avatargroup";
+import { useRouter } from "next/router";
 
 export default function Index({
   csrfToken,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const [loading, setLoading] = useState(false);
+  const session = useSession();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (session) {
+      router.push("/").catch((err) => console.log(err));
+    }
+  }, [session, router]);
   return (
     <div className="flex h-screen w-screen">
       {/* <div className="flex-1 bg-blue-600">
@@ -80,19 +89,35 @@ export default function Index({
             <div>where magic is created</div>
           </div>
           <div className="mt-24 text-lg leading-6 tracking-tight text-gray-100">
-          insightPilot is a platform for collecting and managing client
+            insightPilot is a platform for collecting and managing client
             feedback. It is a tool for you to use with your clients to help you
             understand their needs and improve your service.
           </div>
           <div className="mt-32 flex items-center">
             <AvatarGroup>
-              <Avatar size="large" shape="circle" image="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8Mnx8cGVyc29ufGVufDB8fDB8fA%3D%3D&w=1000&q=80" />
-              <Avatar size="large" shape="circle" image="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRG4jOy8fCXpOV7qkGK7EEqPSCkBF92uTHjTXAPlMZA&s" />
-              <Avatar size="large" shape="circle" image="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTyttEPQ_Vw42N9IpA2rdaPKbEMO3eKqvz6tQcv5I9D&s" />
-              <Avatar size="large" shape="circle" image="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ-BOyLuSIarGrjUBxC1NHPZnqmZKJHpQ-nTsX3zSt5zGPJ3TRatL2YED-waneB9WJ1neM&usqp=CAU" />
+              <Avatar
+                size="large"
+                shape="circle"
+                image="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxzZWFyY2h8Mnx8cGVyc29ufGVufDB8fDB8fA%3D%3D&w=1000&q=80"
+              />
+              <Avatar
+                size="large"
+                shape="circle"
+                image="https://images.unsplash.com/photo-1534528741775-53994a69daeb?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=464&q=80"
+              />
+              <Avatar
+                size="large"
+                shape="circle"
+                image="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTyttEPQ_Vw42N9IpA2rdaPKbEMO3eKqvz6tQcv5I9D&s"
+              />
+              <Avatar
+                size="large"
+                shape="circle"
+                image="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ-BOyLuSIarGrjUBxC1NHPZnqmZKJHpQ-nTsX3zSt5zGPJ3TRatL2YED-waneB9WJ1neM&usqp=CAU"
+              />
             </AvatarGroup>
 
-            <div className="ml-6 font-medium tracking-tight text-gray-100">
+            <div className="ml-4 font-medium tracking-tight text-gray-100">
               People love us , bet you&apos;ll do too!
             </div>
           </div>
@@ -102,7 +127,7 @@ export default function Index({
         <div className="mb-5 text-left">
           <Logo />
           <div className="text-900 mb-2 text-3xl font-medium">Welcome Back</div>
-          <p className="text-500 italic text-sm">
+          <p className="text-500 text-sm italic">
             Enter your email address then check your inbox for a magic link that
             will sign you in instantly.
           </p>

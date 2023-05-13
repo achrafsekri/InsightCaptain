@@ -1,8 +1,19 @@
-import { Card, Text } from "@tremor/react";
+import { Card, Text,Icon } from "@tremor/react";
 import { Button } from "primereact/button";
 import { RadioButton } from "primereact/radiobutton";
 import React from "react";
 import EditRadioField from "./EditRadioField";
+import { RxDragHandleDots2 } from "react-icons/rx";
+
+type Provided = {
+  innerRef: any;
+  draggableProps: any;
+  dragHandleProps: any;
+};
+
+type RadioFieldProps = {
+  provided: Provided;
+};
 
 const RadioOptions = [
   { label: "Cheese", value: "Cheese" },
@@ -10,13 +21,16 @@ const RadioOptions = [
   { label: "Mushroom", value: "Mushroom" },
 ];
 
-const RadioField = () => {
+const RadioField = ({ provided }: RadioFieldProps) => {
   const [edit, setEdit] = React.useState<boolean>(false);
   return (
     <>
       {!edit && (
         <>
-          <div className="absolute top-4 right-4 flex gap-2">
+          <div className="absolute  top-4 right-4 flex items-center justify-center gap-2">
+            <div {...provided.dragHandleProps}>
+              <Icon icon={RxDragHandleDots2} tooltip="Reorder fields" />
+            </div>
             <Button
               icon="pi pi-pencil"
               rounded
