@@ -3,6 +3,11 @@ import { getServerSession } from "next-auth/next";
 import { prisma } from "../../../../server/db";
 import { formatResponse } from "../../../../shared/sharedFunctions";
 
+type Body = {
+  email?: string;
+  role?: string;
+};
+
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
@@ -42,13 +47,14 @@ export default async function handler(
     if (req.method === "PATCH") {
       try {
         const { inviteId } = req.query;
+        const { email } = req.body as Body;
 
         const updateInvite = await prisma.invite.update({
           where: {
             id: String(inviteId),
           },
           data: {
-            email: String(req.body.email),
+            email: String(email),
           },
         });
 

@@ -4,6 +4,11 @@ import { getServerSession } from "next-auth/next";
 import { prisma } from "../../../../../server/db";
 import { formatResponse } from "../../../../../shared/sharedFunctions";
 
+type Body = {
+  title: string;
+  description: string;
+};
+
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
@@ -14,12 +19,12 @@ export default async function handler(
   if (req.method === "POST") {
     try {
       const { organisationId: organizationId } = req.query;
-      const { title, description, image } = req.body;
+      const { title, description } = req.body as Body;
       const createCaseStudy = await prisma.caseStudy.create({
         data: {
           title,
           description,
-          image,
+          
           organization: {
             connect: {
               id: organizationId as string,

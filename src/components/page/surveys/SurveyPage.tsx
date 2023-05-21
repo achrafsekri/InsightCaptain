@@ -5,6 +5,7 @@ import SurveyField from "./surveyFields/SurveyField";
 import { Card, Title, Text } from "@tremor/react";
 import { DragAndDrop, Drag, Drop } from "./drag-and-drop";
 import { reorder } from "../../../lib/helpers";
+import { type SurveyFeild } from "@prisma/client";
 
 type Resurlt = {
   source: {

@@ -1,31 +1,29 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { SessionContextValue, useSession } from "next-auth/react";
-import type { userOrganization } from "@prisma/client";
+import type { User, userOrganization } from "@prisma/client";
 import { getUser } from "../lib/apiCalls";
 import { useQuery } from "@tanstack/react-query";
-import Loading from "../components/global/loading";
+import Loading from "../components/global/Loading";
 
-interface User {
-  id: string;
-  name: string;
-  email: string;
-  image: string;
-  organizations: userOrganization;
-}
+
 
 interface UserContextType {
-  user: User | null;
+  user: User;
 }
 
-export const UserContext = createContext({ user: null });
+type Props = {
+  children: React.ReactNode;
+};
 
-export const UserProvider: React.FC = ({ children }) => {
-  const session = useSession() as SessionContextValue;
+export const UserContext = createContext({ user: {} } as UserContextType);
+
+export const UserProvider = ({ children }: Props) => {
+  const { data: session } = useSession() as SessionContextValue;
   const {
     data: user,
     isLoading,
     isError,
-  } = useQuery(["user"], () => getUser(session?.data?.user.id));
+  } = useQuery(["user"], () => getUser(session?.user.id));
 
   if (isLoading) {
     return <Loading />;

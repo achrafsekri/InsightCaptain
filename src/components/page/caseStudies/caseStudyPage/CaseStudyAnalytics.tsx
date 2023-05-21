@@ -31,13 +31,13 @@ const CaseStudyAnalytics = () => {
       title: "Surveys",
       metric: "15",
       metricPrev: "15,000",
-      href: `/caseStudies/${route.query.caseStudyId}/surveys`,
+      href: `/caseStudies/${route.query.caseStudyId as string}/surveys`,
     },
     {
       title: "Polls",
       metric: "20",
       metricPrev: "75,000",
-      href: `/caseStudies/${route.query.caseStudyId}/polls`,
+      href: `/caseStudies/${route.query.caseStudyId as string}/polls`,
     },
     {
       title: "Country with most responses",

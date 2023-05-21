@@ -4,6 +4,10 @@ import { getServerSession } from "next-auth/next";
 import { prisma } from "../../../../server/db";
 import { formatResponse } from "../../../../shared/sharedFunctions";
 
+type Body = {
+  name: string;
+};
+
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
@@ -35,7 +39,7 @@ export default async function handler(
     if (req.method === "PATCH") {
       try {
         const { organisationId } = req.query;
-        const { name } = req.body;
+        const { name } = req.body as Body;
         const updateOrganization = await prisma.organization.update({
           where: {
             id: String(organisationId),

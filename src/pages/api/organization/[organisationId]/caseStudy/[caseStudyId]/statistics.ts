@@ -7,15 +7,6 @@ import { promise } from "zod";
 import { baseUrl } from "../../../../../../shared/constants";
 import axios from "axios";
 
-type caseStudyStats = {
-  numberOfPolls: number;
-  numberOfSurveys: number;
-  numberOfPollResponses: number;
-  numberOfSurveyResponses: number;
-  mostPopularPoll: Poll;
-  mostPopularSurvey: Survey;
-};
-
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
@@ -38,7 +29,7 @@ export default async function handler(
           .json(formatResponse(null, "Case study not found", "404"));
       }
 
-      const getStats: caseStudyStats = {
+      const getStats = {
         numberOfPolls: getCaseStudy.polls.length,
         numberOfSurveys: getCaseStudy.surveys.length,
         mostPopularPoll: null,
@@ -47,21 +38,22 @@ export default async function handler(
 
       const getPollStats = await Promise.all(
         getCaseStudy.polls.map(async (poll) => {
-          
           const pollStats = await axios.get(
             `${baseUrl}/api/poll/${poll.id}/statistics`
           );
 
-          console.log("pollStats", pollStats)
+          console.log("pollStats", pollStats);
           return pollStats;
         })
       );
-console.log(getPollStats)
+      console.log(getPollStats);
       return res
         .status(200)
         .json(formatResponse(getStats, "Poll stats", "200"));
     } catch (err) {
-      return res.status(500).json(formatResponse(null, err.message, "500"));
+      return res
+        .status(500)
+        .json(formatResponse(null, " error getting stats", "500"));
     }
   }
 }

@@ -20,10 +20,11 @@ export default function Index({
   const router = useRouter();
 
   useEffect(() => {
-    if (session) {
+    if (session.status === "authenticated") {
       router.push("/").catch((err) => console.log(err));
     }
   }, [session, router]);
+
   return (
     <div className="flex h-screen w-screen">
       {/* <div className="flex-1 bg-blue-600">

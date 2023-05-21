@@ -4,7 +4,7 @@ import { baseUrl } from "../shared/constants";
 import { type CaseStudy } from "@prisma/client";
 import { type CreateOrganizationBody } from "../types/apiCalls";
 
-export const getUser = async (userId: string) => {
+export const getUser = async (userId: string | undefined) => {
   const response = await axios
     .get(`${baseUrl}/api/auth/users/${userId}`)
     .catch((error) => {
@@ -24,7 +24,7 @@ export const getCaseStudies = async (organizationId: string) => {
   if (response && response.data) {
     return response.data.data as CaseStudy[];
   } else {
-    return [];
+    return [] as CaseStudy[];
   }
 };
 

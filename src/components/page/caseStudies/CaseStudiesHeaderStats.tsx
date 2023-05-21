@@ -52,7 +52,7 @@ const CaseStudiesHeaderStats = () => {
 
         <div className="mt-6">
           <Card>
-            <div className="h-96 overflow-auto scrollbar scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+            <div className="h-96 overflow-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
               <CaseStudiesTable />
             </div>
           </Card>

@@ -62,6 +62,7 @@ export default async function handler(
       getStats.locationwithmostresponses = Object.keys(
         locationwithmostresponses
       ).reduce((a, b) =>
+      // @ts-ignore
         locationwithmostresponses[a] > locationwithmostresponses[b] ? a : b
       );
 
@@ -75,6 +76,7 @@ export default async function handler(
       }, {} as { [key: string]: number });
       sentiment["null"] = 0; // if no sentiment is provided
       getStats.sentiment = Object.keys(sentiment).reduce((a, b) =>
+      //@ts-ignore
         sentiment[a] > sentiment[b] ? a : b
       ) as Sentiment;
 

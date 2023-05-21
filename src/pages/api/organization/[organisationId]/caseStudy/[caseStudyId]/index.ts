@@ -3,6 +3,12 @@ import { getServerSession } from "next-auth/next";
 import { prisma } from "../../../../../../server/db";
 import { formatResponse } from "../../../../../../shared/sharedFunctions";
 
+type Body = {
+  title: string;
+  description: string;
+  image: string;
+};
+
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
@@ -27,14 +33,15 @@ export default async function handler(
   }
   if (req.method === "PATCH") {
     try {
+      const { title, description, image } = req.body as Body;
       const updateCaseStudy = await prisma.caseStudy.update({
         where: {
           id: caseStudyId as string,
         },
         data: {
-          title: req.body.title,
-          description: req.body.description,
-          image: req.body.image,
+          title,
+          description,
+          image,
         },
       });
       res

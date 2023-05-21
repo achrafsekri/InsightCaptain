@@ -23,13 +23,9 @@ const defaultValues = {
   description: "",
 };
 
-export default function AddSurveyModal({
-  isOpen,
-  setIsOpen,
-}: AddPollModalProps) {
+export default function AddPollModal({ isOpen, setIsOpen }: AddPollModalProps) {
   const [loading, setLoading] = useState(false);
   const {
-    register,
     handleSubmit,
     control,
     formState: { errors },
@@ -39,7 +35,7 @@ export default function AddSurveyModal({
     resolver: yupResolver(schema),
   });
 
-  const getFormErrorMessage = (code) => {
+  const getFormErrorMessage = (code:any) => {
     return errors[code] ? (
       <small className="p-error">{errors[code].message}</small>
     ) : (
@@ -90,10 +86,10 @@ export default function AddSurveyModal({
                   as="h3"
                   className="text-lg font-medium leading-6 text-gray-900"
                 >
-                  Create Survey
+                  Create Poll
                 </Dialog.Title>
                 <form onSubmit={onSubmit}>
-                  <div className="my-3 space-y-3">
+                  <div className="my-3 space-y-2">
                     <div>
                       <label
                         htmlFor="title"
@@ -113,6 +109,7 @@ export default function AddSurveyModal({
                               {...field}
                               id="title"
                               type="text"
+                              
                               placeholder="Survey title"
                               className={classNames("w-full", {
                                 "p-invalid": fieldState.error,

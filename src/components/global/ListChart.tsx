@@ -26,10 +26,13 @@ const countries = [
     stat: "5.1%",
     status: "moderateDecrease",
   },
-  
 ];
 
-const ListChart = ({type}) => {
+type Props = {
+  type: string;
+};
+
+const ListChart = ({ type }: Props) => {
   return (
     <Card>
       <Metric className="mb-2">Countries</Metric>

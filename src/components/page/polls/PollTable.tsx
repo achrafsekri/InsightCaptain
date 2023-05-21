@@ -17,75 +17,82 @@ import Link from "next/link";
 import { useState } from "react";
 import { TrashIcon } from "@heroicons/react/outline";
 import { Ripple } from "primereact/ripple";
+import AddPollModal from "./AddPollModal";
 
-const surveys = [
+const polls = [
   {
     id: "0",
-    title: "survey1",
+    title: "poll1",
     description: "smalll description",
     numberOfRespondats: "300",
   },
   {
     id: "1",
-    title: "survey2",
+    title: "poll2",
     description: "smalll description",
     numberOfRespondats: "300",
   },
   {
     id: "2",
-    title: "survey3",
+    title: "poll3",
     description: "smalll description",
     numberOfRespondats: "300",
   },
   {
     id: "3",
-    title: "survey4",
+    title: "poll4",
     description: "smalll description",
     numberOfRespondats: "300",
   },
   {
     id: "4",
-    title: "survey5",
+    title: "poll5",
     description: "smalll description",
     numberOfRespondats: "300",
   },
   {
     id: "5",
-    title: "survey6",
+    title: "poll6",
     description: "smalll description",
     numberOfRespondats: "300",
   },
   {
     id: "6",
-    title: "survey4",
+    title: "poll4",
     description: "smalll description",
     numberOfRespondats: "300",
   },
   {
     id: "7",
-    title: "survey5",
+    title: "poll5",
     description: "smalll description",
     numberOfRespondats: "300",
   },
   {
     id: "8",
-    title: "survey6",
+    title: "poll6",
     description: "smalll description",
     numberOfRespondats: "300",
   },
 ];
 
-const SurveyTable = () => {
-  const [OpenAddSurveyModale, setOpenAddSurveyModale] = useState(false);
+const PollTable = () => {
+  const [OpenAddPollModale, setOpenAddPollModale] = useState(false);
   const handleDelete = (id: string) => {
     console.log(id);
   };
   return (
     <Card>
+      {OpenAddPollModale && (
+        <AddPollModal
+          setIsOpen={setOpenAddPollModale}
+          isOpen={OpenAddPollModale}
+        />
+      )}
       <div className="flex items-center justify-between">
         <div>
           <Flex justifyContent="start" className="space-x-2">
-            <Title>Surveys</Title>
+            <Title>Polls</Title>
             <Badge color="gray">8</Badge>
           </Flex>
           <Text className="mt-2">Case study name</Text>
@@ -94,16 +101,16 @@ const SurveyTable = () => {
           size="xs"
           variant="primary"
           color="blue"
-          onClick={() => setOpenAddSurveyModale(true)}
+          onClick={() => setOpenAddPollModale(true)}
         >
-          Add survey
+          Add poll
         </Button>
       </div>
 
       <Table className="mt-6">
         <TableHead>
           <TableRow>
-            <TableHeaderCell>Survey Id</TableHeaderCell>
+            <TableHeaderCell>poll Id</TableHeaderCell>
             <TableHeaderCell>Name</TableHeaderCell>
             <TableHeaderCell>N° respondants</TableHeaderCell>
             <TableHeaderCell>Link</TableHeaderCell>
@@ -112,22 +119,20 @@ const SurveyTable = () => {
         </TableHead>
 
         <TableBody>
-          {surveys.map((item, index) => (
+          {polls.map((item, index) => (
             <TableRow key={index}>
               <TableCell>{index + 1}</TableCell>
               <TableCell>{item.title}</TableCell>
               <TableCell>{item.numberOfRespondats}</TableCell>
 
               <TableCell>
-                <Button size="xs" variant="secondary" color="gray">
-                  <Link href={`/surveys/${item.id}`}>See details</Link>
+                <Button size="xs" color="blue" variant="primary">
+                  <Link href={`/polls/${item.id}`}>See details</Link>
                 </Button>
               </TableCell>
               <TableCell>
                 <button
-                  onClick={() => {
-                    handleDelete(item.id);
-                  }}
+                  onClick={() => handleDelete(item.id)}
                   className="flex items-center justify-center rounded-lg p-2 text-red-400 hover:bg-red-500 hover:text-white"
                 >
                   <TrashIcon className="h-5 w-5" />
@@ -142,4 +147,4 @@ const SurveyTable = () => {
   );
 };
 
-export default SurveyTable;
+export default PollTable;

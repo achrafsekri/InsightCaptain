@@ -12,7 +12,7 @@ export default async function handler(
   if (req.method === "GET") {
     try {
       const { caseStudyId } = req.query;
-      const polls: Poll[] = await prisma.Poll.findMany({
+      const polls= await prisma.poll.findMany({
         where: {
           caseStudyId: caseStudyId as string,
         },

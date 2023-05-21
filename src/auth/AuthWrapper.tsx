@@ -1,10 +1,14 @@
 import { signIn, signOut, useSession } from "next-auth/react";
-import Loading from "../components/global/loading";
+import Loading from "../components/global/Loading";
 import React from "react";
 import { useRouter } from "next/router";
 import { publicRoutes } from "../shared/constants";
 
-const AuthWrapper = ({ children }) => {
+type Props = {
+  children: React.ReactNode;
+};
+
+const AuthWrapper = ({ children }: Props) => {
   const router = useRouter();
   const session = useSession();
   if (session.status === "loading") {
@@ -14,7 +18,9 @@ const AuthWrapper = ({ children }) => {
     session.status === "unauthenticated" &&
     !publicRoutes.includes(router.pathname)
   ) {
-    signIn();
+    signIn().catch(() => {
+      console.log("Sign in failed");
+    });
     return <div>Redirecting...</div>;
   }
   if (

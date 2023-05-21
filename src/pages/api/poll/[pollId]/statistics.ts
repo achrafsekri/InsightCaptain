@@ -49,21 +49,33 @@ export default async function handler(
       getStats.totalResponses = getResponses.length;
       getStats.totalOptions = getPoll.options.length;
       const locationwithmostresponses: locationwithmostresponses =
-        getResponses.reduce((acc, curr) => {
-          if (curr.location === null) return acc;
-          if (acc[curr.location]) {
-            acc[curr.location] += 1;
-          } else {
-            acc[curr.location] = 1;
-          }
-          return acc;
-        }, {} as { [key: string]: number });
+        getResponses.reduce(
+          (acc, curr) => {
+            if (curr.location === null) return acc;
+            if (acc[curr.location]) {
+              acc[curr.location] += 1;
+            } else {
+              acc[curr.location] = 1;
+            }
+            return acc;
+          },
+          { null: 0 } as { [key: string]: number }
+        );
       locationwithmostresponses["null"] = 0; // if no location is provided
       getStats.locationwithmostresponses = Object.keys(
         locationwithmostresponses
-      ).reduce((a, b) =>
-        locationwithmostresponses[a] > locationwithmostresponses[b] ? a : b
-      );
+      ).reduce((a, b) => {
+        if (
+          locationwithmostresponses[a] !== undefined &&
+          locationwithmostresponses[b] !== undefined
+        ) {
+          // @ts-ignore
+          return locationwithmostresponses[a] > locationwithmostresponses[b]
+            ? a
+            : b;
+        }
+        return a; // or return some default value
+      });
 
       return res
         .status(200)

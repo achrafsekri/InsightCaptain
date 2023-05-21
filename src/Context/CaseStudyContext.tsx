@@ -2,35 +2,34 @@ import { createContext, useContext, useEffect, useState } from "react";
 
 import { getCaseStudies } from "../lib/apiCalls";
 import { useQuery } from "@tanstack/react-query";
-import Loading from "../components/global/loading";
+import Loading from "../components/global/Loading";
 import { type CaseStudy } from "@prisma/client";
 import { useUser } from "../auth/UserContext";
+import { useOrganization } from "./OrganizationContext";
 
 interface CaseStudyContextType {
-  caseStudies: CaseStudy | null;
+  caseStudies: CaseStudy[] | undefined;
   refetch: () => void;
 }
-type Value = CaseStudyContextType;
+
+type CaseStudyProviderProps = {
+  children: React.ReactNode;
+};
 
 export const CaseStudyContext = createContext({
-  caseStudies: null,
-  refetch: void 0,
+  caseStudies: [] as CaseStudy[],
+  refetch: () => {},
 });
 
-export const CaseStudyProvider: React.FC = ({
-  children,
-}: {
-  children: React.ReactNode;
-}) => {
-  const user = useUser();
+export const CaseStudyProvider = ({ children }: CaseStudyProviderProps) => {
+  const { currentOrganization } = useOrganization();
+  console.log(currentOrganization);
   const {
     data: caseStudies,
     isLoading,
     isError,
     refetch,
-  } = useQuery(["caseStudies"], () =>
-    getCaseStudies(user.user.organizations[0]?.organizationId as string)
-  );
+  } = useQuery(["caseStudies"], () => getCaseStudies(currentOrganization.id));
 
   if (isLoading) {
     return <Loading />;

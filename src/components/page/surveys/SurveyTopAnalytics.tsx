@@ -1,41 +1,35 @@
 import { Card, Title, Text, Grid, Flex, Button } from "@tremor/react";
-import React, { useState, type MouseEvent } from "react";
+import React, { type MouseEvent } from "react";
 import SurveyeesChart from "./SurveyeesChart";
 import ListChart from "../../global/ListChart";
 import AgeGroupListChart from "../../global/AgeGroupListChart";
-import {
-  DocumentDownloadIcon,
-  PencilAltIcon,
-  PlusCircleIcon,
-} from "@heroicons/react/outline";
+import { DocumentDownloadIcon, PencilAltIcon } from "@heroicons/react/outline";
 import { useRouter } from "next/router";
-import AddSurveyModal from "./AddSurveyModal";
 
-const TopAnalytics = () => {
-  const [openAddSurveyModal, setOpenAddSurveyModal] = useState(false);
+const SurveyTopAnalytics = () => {
+  const router = useRouter();
+  const handleEdit = (): void => {
+    router.push("/surveys/[surveyId]/edit", "/surveys/1/edit").catch((err) => {
+      console.error(err);
+    });
+  };
   return (
     <>
-      {openAddSurveyModal && (
-        <AddSurveyModal
-          isOpen={openAddSurveyModal}
-          setIsOpen={setOpenAddSurveyModal}
-        />
-      )}
       <Flex className="justify-between">
         <div>
-          <Title>Surveys insights</Title>
-          <Text>An overview of your surveys analytics</Text>
+          <Title>Survey Title</Title>
+          <Text>An overview of your surveys</Text>
         </div>
         <div>
           <Button icon={DocumentDownloadIcon} className="mt-4">
             Export
           </Button>
           <Button
-            icon={PlusCircleIcon}
-            className="mt-4 ml-4"
-            onClick={() => setOpenAddSurveyModal(true)}
+            icon={PencilAltIcon}
+            className="mt-4 ml-2"
+            onClick={handleEdit}
           >
-            Add survey
+            Edit
           </Button>
         </div>
       </Flex>
@@ -58,4 +52,4 @@ const TopAnalytics = () => {
   );
 };
 
-export default TopAnalytics;
+export default SurveyTopAnalytics;

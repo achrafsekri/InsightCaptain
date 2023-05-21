@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth/next";
 import { prisma } from "../../../../../server/db";
 import { formatResponse } from "../../../../../shared/sharedFunctions";
 import axios from "axios";
+import { type Sentiment as PrismaSentiment } from "@prisma/client";
 
 import type {
   Survey,
@@ -57,8 +58,14 @@ type Answer = {
 }[];
 
 type Sentiment = {
-  result: string;
+  result: string[];
   requests: string[];
+};
+
+type SentimentAnalysis = {
+  data: {
+    data: Sentiment;
+  };
 };
 
 // getFormattedAnswer is a function that formats the answer to the format that GPT-3 expects
@@ -113,7 +120,7 @@ export default async function handler(
       const data = JSON.stringify({
         answer: GptFormattedAnswer,
       });
-      const SentimentAnalysis = await axios.get(
+      const SentimentAnalysis: SentimentAnalysis = await axios.get(
         "http://localhost:3000/api/gpt/sentiment",
         {
           headers: {
@@ -123,7 +130,7 @@ export default async function handler(
         }
       );
 
-      const sentiment = SentimentAnalysis.data.data as Sentiment;
+      const sentiment = SentimentAnalysis.data.data;
 
       console.log("sentiment", sentiment.result[0]);
 
@@ -133,7 +140,7 @@ export default async function handler(
           surveyId: surveyId as string,
           email,
           fullName,
-          sentiment: sentiment.result[0]?.toUpperCase(),
+          sentiment: sentiment.result[0]?.toUpperCase() as PrismaSentiment,
           requested: sentiment.requests.join(", "),
           phoneNumber,
           age,
@@ -160,7 +167,7 @@ export default async function handler(
                 surveyFieldId: answer.surveyFieldId,
                 pickedOptions: {
                   connect: {
-                    id: answer?.pickedOptions[0].id,
+                    id: answer?.pickedOptions[0]?.id,
                   },
                 },
               },
@@ -192,7 +199,7 @@ export default async function handler(
       SurveyAnswerReturn.ipAddress = surveyAnswer.ipAddress;
       SurveyAnswerReturn.requested = surveyAnswer.requested;
       SurveyAnswerReturn.sentiment = surveyAnswer.sentiment;
-      
+
       return res
         .status(201)
         .json(formatResponse(SurveyAnswerReturn, "Success", "201"));

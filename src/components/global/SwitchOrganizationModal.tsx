@@ -1,21 +1,22 @@
-import React from "react";
+import React, { useRef } from "react";
 import { useUser } from "../../auth/UserContext";
 import { Dialog, Transition } from "@headlessui/react";
 import { Fragment, useState } from "react";
-import { Organization, userOrganization } from "@prisma/client";
-import { classNames } from "primereact/utils";
+import { Organization, User, userOrganization } from "@prisma/client";
+
 import { Avatar } from "primereact/avatar";
+import { useOrganization } from "../../Context/OrganizationContext";
+import { Ripple } from "primereact/ripple";
 
 type Props = {
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
+  showToast: (state: string, organizationName: string) => void;
 };
 
-const SwitchOrganizationModal = ({ isOpen, setIsOpen }: Props) => {
-  const { user } = useUser();
-  const setOrganization = (organization: Organization) => {
-    console.log(organization);
-  };
+const SwitchOrganizationModal = ({ isOpen, setIsOpen, showToast }: Props) => {
+  const { currentOrganization, setCurrentOrganization } = useOrganization();
+  const { user }: { user: User } = useUser();
 
   function closeModal() {
     setIsOpen(false);
@@ -61,43 +62,63 @@ const SwitchOrganizationModal = ({ isOpen, setIsOpen }: Props) => {
                   </p>
                 </div>
                 <div className="mt-8 flex flex-col gap-6">
-                  {user?.organizations?.map(
-                    (organization: userOrganization, index: number) => (
-                      <button
-                        key={index}
-                        onClick={(e) =>
-                          setOrganization(organization.organization)
-                        }
-                        className="p-link mb-2 flex w-full items-center rounded-md border-2 border-gray-800 p-2"
-                      >
-                        {/* //! need to add pic */}
-                        {organization.organization.image && (
-                          <Avatar
-                            image={organization.organization.image}
-                            className="mr-2"
-                            shape="circle"
-                          />
-                        )}
-                        {!organization.organization.image && (
-                          <Avatar
-                            label={organization.organization.name[0].toUpperCase()}
-                            style={{
-                              backgroundColor: "#2196F3",
-                              color: "#ffffff",
-                            }}
-                            className="mr-2"
-                            shape="circle"
-                          />
-                        )}
-                        <div className="align flex flex-col">
-                          <span className="font-bold">
-                            {organization.organization.name}
-                          </span>
-                          <span className="text-sm">{organization.role}</span>
-                        </div>
-                      </button>
+                  {
+                    //@ts-ignore
+                    user?.organizations?.map(
+                      (organization: userOrganization, index: number) => (
+                        <button
+                          key={index}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            localStorage.setItem(
+                              "currentOrganization",
+                              JSON.stringify(organization.organization)
+                            );
+                            setCurrentOrganization(organization.organization);
+                            showToast(
+                              "success",
+                              organization.organization.name
+                            );
+                            setIsOpen(false);
+                          }}
+                          className={
+                            currentOrganization.id ===
+                            organization.organization?.id
+                              ? " relative mb-2 flex w-full items-center rounded-md border-blue-200 bg-blue-100 p-2  focus:border-2"
+                              : " relative mb-2 flex w-full items-center rounded-md border-blue-200 p-2  focus:border-2 "
+                          }
+                        >
+                          {organization.organization.image && (
+                            <Avatar
+                              image={organization.organization.image}
+                              className="mr-2"
+                              shape="circle"
+                            />
+                          )}
+                          {!organization.organization.image && (
+                            <Avatar
+                              label={organization.organization.name[0].toUpperCase()}
+                              style={{
+                                backgroundColor: "#2196F3",
+                                color: "#ffffff",
+                              }}
+                              className="mr-2"
+                              shape="circle"
+                            />
+                          )}
+                          <div className=" flex flex-col items-start">
+                            <span className="font-bold capitalize">
+                              {organization.organization.name}
+                            </span>
+                            <span className="text-sm">
+                              {organization.role?.toLowerCase()}
+                            </span>
+                          </div>
+                          <Ripple />
+                        </button>
+                      )
                     )
-                  )}
+                  }
                 </div>
               </Dialog.Panel>
             </Transition.Child>

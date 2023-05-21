@@ -3,6 +3,12 @@ import { NextApiRequest, NextApiResponse } from "next";
 import { getServerSession } from "next-auth/next";
 import { prisma } from "../../../../../server/db";
 import { formatResponse } from "../../../../../shared/sharedFunctions";
+import { type Role } from "@prisma/client";
+
+
+type Body = {
+  role: Role;
+};
 
 export default async function handler(
   req: NextApiRequest,
@@ -51,16 +57,14 @@ export default async function handler(
 
   if (req.method === "PATCH") {
     try {
-      const { role } = req.body;
-      const newRole = role.toUpperCase();
-      console.log(newRole);
+      const { role } = req.body as Body;
       const updateRole = await prisma.userOrganization.updateMany({
         where: {
           userId: String(userId),
           organizationId: String(organizationId),
         },
         data: {
-          role: newRole,
+          role: role,
         },
       });
       return res.status(200).json(formatResponse(updateRole, "Success", "OK"));

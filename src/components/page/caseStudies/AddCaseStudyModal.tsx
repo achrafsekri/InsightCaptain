@@ -19,7 +19,12 @@ const defaultValues = {
   description: "",
 };
 
-export default function AddCaseStudyModal({ isOpen, setIsOpen }) {
+type Props = {
+  isOpen: boolean;
+  setIsOpen: (isOpen: boolean) => void;
+};
+
+export default function AddCaseStudyModal({ isOpen, setIsOpen }: Props) {
   const [loading, setLoading] = useState(false);
   const {
     register,
@@ -32,12 +37,8 @@ export default function AddCaseStudyModal({ isOpen, setIsOpen }) {
     resolver: yupResolver(schema),
   });
 
-  const getFormErrorMessage = (code) => {
-    return errors[code] ? (
-      <small className="p-error">{errors[code].message}</small>
-    ) : (
-      <small className="p-error">&nbsp;</small>
-    );
+  const getFormErrorMessage = (title: string) => {
+    return <small className="p-error">an error ocured</small>;
   };
 
   const onSubmit = handleSubmit((data) => {
@@ -85,7 +86,13 @@ export default function AddCaseStudyModal({ isOpen, setIsOpen }) {
                 >
                   Create case study
                 </Dialog.Title>
-                <form onSubmit={onSubmit}>
+                <form
+                  onSubmit={() => {
+                    onSubmit().catch(() => {
+                      console.log("error");
+                    });
+                  }}
+                >
                   <div className="my-3 space-y-4">
                     <div>
                       <label
@@ -111,7 +118,7 @@ export default function AddCaseStudyModal({ isOpen, setIsOpen }) {
                                 "p-invalid": fieldState.error,
                               })}
                             />
-                            {getFormErrorMessage(field.title)}
+                            {getFormErrorMessage("error")}
                           </>
                         )}
                       />
@@ -140,7 +147,7 @@ export default function AddCaseStudyModal({ isOpen, setIsOpen }) {
                                 "p-invalid": fieldState.error,
                               })}
                             />
-                            {getFormErrorMessage(field.description)}
+                            {getFormErrorMessage("error")}
                           </>
                         )}
                       />

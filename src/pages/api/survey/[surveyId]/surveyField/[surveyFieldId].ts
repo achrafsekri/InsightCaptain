@@ -3,6 +3,13 @@ import { NextApiRequest, NextApiResponse } from "next";
 import { getServerSession } from "next-auth/next";
 import { prisma } from "../../../../../server/db";
 import { formatResponse } from "../../../../../shared/sharedFunctions";
+import { type SurveyFeildType } from "@prisma/client";
+
+type Body = {
+  title: string;
+  type: SurveyFeildType;
+  helperText: string;
+};
 
 export default async function handler(
   req: NextApiRequest,
@@ -11,7 +18,7 @@ export default async function handler(
   const { surveyFieldId } = req.query;
   if (req.method === "GET") {
     try {
-      const surveyField = await prisma.SurveyFeild.findUnique({
+      const surveyField = await prisma.surveyFeild.findUnique({
         where: {
           id: String(surveyFieldId),
         },
@@ -27,9 +34,9 @@ export default async function handler(
   }
 
   if (req.method === "PATCH") {
-    const { title, type, helperText } = req.body;
+    const { title, type, helperText } = req.body as Body;
     try {
-      const surveyField = await prisma.SurveyFeild.update({
+      const surveyField = await prisma.surveyFeild.update({
         where: {
           id: String(surveyFieldId),
         },
@@ -51,7 +58,7 @@ export default async function handler(
 
   if (req.method === "DELETE") {
     try {
-      const surveyField = await prisma.SurveyFeild.delete({
+      const surveyField = await prisma.surveyFeild.delete({
         where: {
           id: String(surveyFieldId),
         },

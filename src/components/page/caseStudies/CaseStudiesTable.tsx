@@ -17,6 +17,7 @@ import { useCaseStudy } from "../../../Context/CaseStudyContext";
 import Link from "next/link";
 import { useState } from "react";
 import AddCaseStudyModal from "./AddCaseStudyModal";
+import { CaseStudy } from "@prisma/client";
 
 const transactions = [
   {
@@ -118,19 +119,20 @@ export default function CaseStudiesTable() {
         </TableHead>
 
         <TableBody>
-          {caseStudies.map((item, index) => (
-            <TableRow key={item.id}>
-              <TableCell>{index + 1}</TableCell>
-              <TableCell>{item.title}</TableCell>
-              <TableCell>{"5"}</TableCell>
-              <TableCell>{"6"}</TableCell>
-              <TableCell>
-                <Button size="xs" variant="secondary" color="gray">
-                  <Link href={`/caseStudies/${item.id}`}>See details</Link>
-                </Button>
-              </TableCell>
-            </TableRow>
-          ))}
+          {caseStudies &&
+            caseStudies.map((item: CaseStudy, index: number) => (
+              <TableRow key={item.id}>
+                <TableCell>{index + 1}</TableCell>
+                <TableCell>{item.title}</TableCell>
+                <TableCell>{"5"}</TableCell>
+                <TableCell>{"6"}</TableCell>
+                <TableCell>
+                  <Button size="xs" variant="secondary" color="gray">
+                    <Link href={`/caseStudies/${item.id}`}>See details</Link>
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))}
         </TableBody>
       </Table>
     </Card>

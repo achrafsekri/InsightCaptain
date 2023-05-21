@@ -11,27 +11,27 @@ import React, { useState } from "react";
 const chartdata = [
   {
     date: "Jan 9",
-    "Number of surveyees": 24,
+    "Number of respondents": 24,
   },
   {
     date: "Jan 20",
-    "Number of surveyees": 35,
+    "Number of respondents": 35,
   },
   {
     date: "Jan 21",
-    "Number of surveyees": 254,
+    "Number of respondents": 254,
   },
   {
     date: "Jan 25",
-    "Number of surveyees": 12,
+    "Number of respondents": 12,
   },
   {
     date: "Jan 26",
-    "Number of surveyees": 120,
+    "Number of respondents": 120,
   },
 ];
 
-const SurveyeesChart = () => {
+const RespondentsChart = () => {
   const [value, setValue] = useState<DateRangePickerValue>([
     new Date(2022, 1, 1),
     new Date(),
@@ -39,7 +39,7 @@ const SurveyeesChart = () => {
   console.log(value);
   return (
     <Card>
-      <Title>Number of surveyees</Title>
+      <Title>Number of poll respondents</Title>
       <DateRangePicker
         className="mx-auto max-w-md"
         value={value}
@@ -51,7 +51,7 @@ const SurveyeesChart = () => {
         className="mt-6"
         data={chartdata}
         index="date"
-        categories={["Number of surveyees"]}
+        categories={["Number of respondents"]}
         colors={["blue"]}
         yAxisWidth={40}
       />
@@ -59,4 +59,4 @@ const SurveyeesChart = () => {
   );
 };
 
-export default SurveyeesChart;
+export default RespondentsChart;
