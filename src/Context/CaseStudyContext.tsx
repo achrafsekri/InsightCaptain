@@ -18,16 +18,17 @@ type CaseStudyProviderProps = {
 
 export const CaseStudyContext = createContext({
   caseStudies: [] as CaseStudy[],
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   refetch: () => {},
 });
 
 export const CaseStudyProvider = ({ children }: CaseStudyProviderProps) => {
   const { currentOrganization } = useOrganization();
-  console.log(currentOrganization);
   const {
     data: caseStudies,
     isLoading,
     isError,
+    error,
     refetch,
   } = useQuery(["caseStudies"], () => getCaseStudies(currentOrganization.id));
 
@@ -36,11 +37,12 @@ export const CaseStudyProvider = ({ children }: CaseStudyProviderProps) => {
   }
 
   if (isError) {
-    console.log("Error fetching user data");
+    console.log("Error fetching case studies", error);
     return <div>Error</div>;
   }
 
   return (
+    // eslint-disable-next-line @typescript-eslint/no-misused-promises
     <CaseStudyContext.Provider value={{ caseStudies, refetch }}>
       {children}
     </CaseStudyContext.Provider>

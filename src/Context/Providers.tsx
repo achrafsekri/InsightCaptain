@@ -7,13 +7,13 @@ const Providers = ({ children }: { children: React.ReactNode }) => {
   const { user } = useUser();
   return (
     <>
-      {user?.organizations.length > 0 && (
+      {user.organizations && user?.organizations.length > 0 && (
         <OrganizationProvider>
-          {/* <CaseStudyProvider>{children}</CaseStudyProvider> */}
+          <CaseStudyProvider>{children}</CaseStudyProvider>
           {children}
         </OrganizationProvider>
       )}
-      {user?.organizations.length == 0 && <>{children}</>}
+      {user.organizations && user?.organizations.length == 0 && <>{children}</>}
     </>
   );
 };

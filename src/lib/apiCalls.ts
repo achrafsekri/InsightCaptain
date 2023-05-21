@@ -15,6 +15,7 @@ export const getUser = async (userId: string | undefined) => {
 };
 
 export const getCaseStudies = async (organizationId: string) => {
+  console.log("organization id",organizationId);
   const response = await axios
     .get(`${baseUrl}/api/organization/${organizationId}/caseStudy`)
     .catch((error) => {
