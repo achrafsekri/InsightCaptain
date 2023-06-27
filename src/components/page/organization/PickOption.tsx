@@ -5,8 +5,6 @@ import JoinOrganization from "./JoinOrganization";
 
 const PickOption = () => {
   const [step, setStep] = React.useState("pick");
-  console.log(step);
-
   return (
     <div className=" container h-2/3 max-w-3xl  rounded-lg bg-white shadow-sm ">
       {step === "pick" && (

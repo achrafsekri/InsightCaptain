@@ -116,23 +116,23 @@ export default async function handler(
       }
 
       // get sentiment analysis of the answer and most requested topics and save it to the database for future use
-      const GptFormattedAnswer = JSON.stringify(getFormattedAnswer(answer));
-      const data = JSON.stringify({
-        answer: GptFormattedAnswer,
-      });
-      const SentimentAnalysis: SentimentAnalysis = await axios.get(
-        "http://localhost:3000/api/gpt/sentiment",
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-          data: data,
-        }
-      );
+      // const GptFormattedAnswer = JSON.stringify(getFormattedAnswer(answer));
+      // const data = JSON.stringify({
+      //   answer: GptFormattedAnswer,
+      // });
+      // const SentimentAnalysis: SentimentAnalysis = await axios.get(
+      //   "http://localhost:3000/api/gpt/sentiment",
+      //   {
+      //     headers: {
+      //       "Content-Type": "application/json",
+      //     },
+      //     data: data,
+      //   }
+      // );
 
-      const sentiment = SentimentAnalysis.data.data;
+      // const sentiment = SentimentAnalysis.data.data;
 
-      console.log("sentiment", sentiment.result[0]);
+      // console.log("sentiment", sentiment.result[0]);
 
       // save the answer to the database
       const surveyAnswer: SurveyAnswer = await prisma.surveyAnswer.create({
@@ -140,12 +140,13 @@ export default async function handler(
           surveyId: surveyId as string,
           email,
           fullName,
-          sentiment: sentiment.result[0]?.toUpperCase() as PrismaSentiment,
-          requested: sentiment.requests.join(", "),
+          sentiment: "POSITIVE",
+          requested: "requested",
           phoneNumber,
           age,
           location: location,
           ipAddress: ipAddress,
+          createdAtMonth: new Date().getMonth(),
         },
       });
 
@@ -213,27 +214,27 @@ export default async function handler(
 
   if (req.method === "GET") {
     const { surveyId } = req.query;
-    const SurveyAnswers = {} as SurveyAnswers;
     try {
-      const surveyAnswer: SurveyAnswer[] | null =
-        await prisma.surveyAnswer.findMany({
-          where: {
-            surveyId: String(surveyId),
-          },
-          include: {
-            surveyFeildAnswer: true,
-          },
-        });
+      const surveyAnswer = await prisma.surveyAnswer.findMany({
+        where: {
+          surveyId: String(surveyId),
+        },
+        include: {
+          surveyFeildAnswer: true,
+        },
+      });
+
+      
+
       if (!surveyAnswer) {
         return res
           .status(404)
           .json(formatResponse(null, "Answer not found", "404"));
       }
-      SurveyAnswers.data = surveyAnswer;
-      SurveyAnswers.SurveyeesCount = surveyAnswer.length;
+
       return res
         .status(200)
-        .json(formatResponse(SurveyAnswers, "Success", "200"));
+        .json(formatResponse(surveyAnswer, "Success", "200"));
     } catch (error) {
       console.error(error);
       return res

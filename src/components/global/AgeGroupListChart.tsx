@@ -1,53 +1,34 @@
 import React from "react";
 import { Card, Metric, Text, Flex, Bold, List, ListItem } from "@tremor/react";
-const ageGroup = [
-  {
-    age: "24-32",
-    stat: "18.3%",
-    status: "increase",
-  },
-  {
-    age: ">18",
-    stat: "8.3%",
-    status: "moderateIncrease",
-  },
-  {
-    age: "40-49",
-    stat: "1.6%",
-    status: "unchanged",
-  },
-  {
-    age: "<60",
-    stat: "5.1%",
-    status: "moderateDecrease",
-  },
-  {
-    age: "32-40",
-    stat: "5.1%",
-    status: "moderateDecrease",
-  },
-];
+import { findMaxAgeGroup } from "../../lib/helpers";
 
-const AgeGroupListChart = ({ type }) => {
+type AgeGroupListChartProps = {
+  type: string;
+  data: { name: string; value: number; persantage: number }[];
+};
+
+const AgeGroupListChart = ({ type, data }: AgeGroupListChartProps) => {
+  const topGroup: { name: string; value: number; persantage: number } =
+    findMaxAgeGroup(data);
   return (
     <Card>
       <Metric className="mb-2">Age</Metric>
-      <Text>Top 5 age groups with the most {type} respondants</Text>
+      <Text>Top 7 age groups with the most {type} respondants</Text>
       <Flex className="mt-6">
         <Text>
-          <Bold>18-24</Bold>
+          <Bold>{topGroup.name}</Bold>
         </Text>
         <Text>
-          <Bold>18.3%</Bold>
+          <Bold>{topGroup.value}</Bold>
         </Text>
       </Flex>
       <List className="mt-1">
-        {ageGroup.map((group, index) => (
+        {data?.map((group, index) => (
           <ListItem key={index}>
             <Flex justifyContent="start" className="space-x-2.5 truncate">
-              <Text className="truncate">{group.age}</Text>
+              <Text className="truncate">{group.name}</Text>
             </Flex>
-            <Text>{group.stat}</Text>
+            <Text>{group.persantage}%</Text>
           </ListItem>
         ))}
       </List>

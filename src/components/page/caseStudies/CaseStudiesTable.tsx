@@ -93,7 +93,7 @@ export default function CaseStudiesTable() {
         <div>
           <Flex justifyContent="start" className="space-x-2">
             <Title>Case Studies</Title>
-            <Badge color="gray">8</Badge>
+            <Badge color="gray">{caseStudies?.length}</Badge>
           </Flex>
           <Text className="mt-2">Overview of your case Studies</Text>
         </div>
@@ -112,8 +112,7 @@ export default function CaseStudiesTable() {
           <TableRow>
             <TableHeaderCell>Case study Id</TableHeaderCell>
             <TableHeaderCell>Name</TableHeaderCell>
-            <TableHeaderCell>N° surveys</TableHeaderCell>
-            <TableHeaderCell>N° polls</TableHeaderCell>
+            <TableHeaderCell>Description</TableHeaderCell>
             <TableHeaderCell>Link</TableHeaderCell>
           </TableRow>
         </TableHead>
@@ -124,8 +123,8 @@ export default function CaseStudiesTable() {
               <TableRow key={item.id}>
                 <TableCell>{index + 1}</TableCell>
                 <TableCell>{item.title}</TableCell>
-                <TableCell>{"5"}</TableCell>
-                <TableCell>{"6"}</TableCell>
+                <TableCell>{item.description}</TableCell>
+                
                 <TableCell>
                   <Button size="xs" variant="secondary" color="gray">
                     <Link href={`/caseStudies/${item.id}`}>See details</Link>

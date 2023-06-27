@@ -3,19 +3,7 @@ import { getServerSession } from "next-auth/next";
 import { prisma } from "../../../../server/db";
 import { formatResponse } from "../../../../shared/sharedFunctions";
 import type { Survey, SurveyAnswer } from "@prisma/client";
-
-enum Sentiment {
-  Positive = "Positive",
-  Negative = "Negative",
-  Neutral = "Neutral",
-}
-
-type stats = {
-  totalResponses?: number;
-  totalQuestions?: number;
-  locationwithmostresponses?: string;
-  sentiment?: Sentiment;
-};
+import { ageGroups } from "../../../../shared/constants";
 
 export default async function handler(
   req: NextApiRequest,
@@ -24,63 +12,115 @@ export default async function handler(
   if (req.method === "GET") {
     try {
       const { surveyId } = req.query;
-      const getSurvey = await prisma.survey.findUnique({
+      const countriesWithMostResponses = prisma.surveyAnswer.groupBy({
+        by: ["location"],
         where: {
-          id: String(surveyId),
+          surveyId: surveyId as string,
         },
-        include: {
-          surveyField: true,
+        _count: {
+          location: true,
+        },
+        orderBy: {
+          _count: {
+            location: "desc",
+          },
+        },
+        take: 5,
+      });
+      const respondantsByAge = await prisma.surveyAnswer.groupBy({
+        by: ["age"],
+        where: {
+          survey: {
+            id: surveyId as string,
+          },
+        },
+        _count: {
+          age: true,
+        },
+        orderBy: {
+          _count: {
+            age: "desc",
+          },
+        },
+        take: 6,
+      });
+      const totalRespondants = await prisma.surveyAnswer.count({
+        where: {
+          survey: {
+            id: surveyId as string,
+          },
         },
       });
-      if (!getSurvey) {
-        return res
-          .status(404)
-          .json(formatResponse(null, "Survey not found", "404"));
+
+      const ageGroupsData = ageGroups.map((group) => {
+        const ageGroup = respondantsByAge.find((age) => {
+          return age.age >= group.over && age.age <= group.under;
+        });
+        if (ageGroup) {
+          return {
+            name: group.name,
+            value: ageGroup._count.age,
+            persantage: (ageGroup._count.age / totalRespondants) * 100,
+          };
+        }
+        return {
+          name: group.name,
+          value: 0,
+          persantage: 0,
+        };
+      });
+
+      const sentiments = await prisma.surveyAnswer.groupBy({
+        by: ["sentiment"],
+        where: {
+          survey: {
+            id: surveyId as string,
+          },
+        },
+        _count: {
+          sentiment: true,
+        },
+        orderBy: {
+          _count: {
+            sentiment: "desc",
+          },
+        },
+        take: 3,
+      });
+
+      const sentimentsFormatted = sentiments.map((sentiment) => {
+        return {
+          name: sentiment.sentiment,
+          value: sentiment._count.sentiment,
+          persantage: (sentiment._count.sentiment / totalRespondants) * 100,
+        };
+      });
+
+      // if there is no Postive or negative or neutral response fill them with 0
+      if (sentimentsFormatted.length < 3) {
+        const sentimentsNames = sentimentsFormatted.map(
+          (sentiment) => sentiment.name
+        );
+        const sentimentsToAdd = ["POSITIVE", "NEGATIVE", "NEUTRAL"].filter(
+          (sentiment) => !sentimentsNames.includes(sentiment)
+        );
+        sentimentsToAdd.forEach((sentiment) => {
+          sentimentsFormatted.push({
+            name: sentiment,
+            value: 0,
+            persantage: 0,
+          });
+        });
       }
 
-      const getStats: stats = {};
-      const getResponses: SurveyAnswer[] = (await prisma.surveyAnswer.findMany({
-        where: {
-          surveyId: String(surveyId),
-        },
-        include: {
-          surveyFeildAnswer: true,
-        },
-      })) as SurveyAnswer[];
-
-      getStats.totalResponses = getResponses.length;
-      getStats.totalQuestions = getSurvey.surveyField.length;
-      const locationwithmostresponses = getResponses.reduce((acc, curr) => {
-        if (acc[curr.location]) {
-          acc[curr.location] += 1;
-        } else {
-          acc[curr.location] = 1;
-        }
-        return acc;
-      }, {} as { [key: string]: number });
-      locationwithmostresponses["null"] = 0; // if no location is provided
-      getStats.locationwithmostresponses = Object.keys(
-        locationwithmostresponses
-      ).reduce((a, b) =>
-      // @ts-ignore
-        locationwithmostresponses[a] > locationwithmostresponses[b] ? a : b
-      );
-
-      const sentiment = getResponses.reduce((acc, curr) => {
-        if (acc[curr.sentiment]) {
-          acc[curr.sentiment] += 1;
-        } else {
-          acc[curr.sentiment] = 1;
-        }
-        return acc;
-      }, {} as { [key: string]: number });
-      sentiment["null"] = 0; // if no sentiment is provided
-      getStats.sentiment = Object.keys(sentiment).reduce((a, b) =>
-      //@ts-ignore
-        sentiment[a] > sentiment[b] ? a : b
-      ) as Sentiment;
-
-      return res.status(200).json(formatResponse(getStats, "Success", "201"));
+      const stats = {
+        countriesWithMostResponses:
+          countriesWithMostResponses == {} ? countriesWithMostResponses : [],
+        totalRespondants,
+        ageGroupsData,
+        sentiments: sentimentsFormatted,
+      };
+      res.status(200).json(formatResponse(stats, "Survey stats", "200"));
     } catch {
       res
         .status(500)

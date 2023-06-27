@@ -2,8 +2,12 @@ import { Text, Icon } from "@tremor/react";
 import { InputTextarea } from "primereact/inputtextarea";
 import { Button } from "primereact/button";
 import React from "react";
-import EditTextField from "./EditTextField";
+import EditSurveyField from "./EditSurveyField";
 import { RxDragHandleDots2 } from "react-icons/rx";
+import { SurveyFeild } from "@prisma/client";
+import { deleteSurveyField } from "../../../../lib/apiCalls";
+import { useRouter } from "next/router";
+import { useSingleSurvey } from "../../../../pages/surveys/[surveyId]/edit";
 
 type Provided = {
   innerRef: any;
@@ -13,10 +17,27 @@ type Provided = {
 
 type TextFieldProps = {
   provided: Provided;
+  data: SurveyFeild;
 };
 
-const TextField = ({ provided }: TextFieldProps) => {
+const TextField = ({ provided, data }: TextFieldProps) => {
+  const router = useRouter();
+  const { surveyId } = router.query;
+  const { refetch } = useSingleSurvey();
   const [edit, setEdit] = React.useState<boolean>(false);
+  const [loading, setLoading] = React.useState<boolean>(false);
+  const handleDelete = () => {
+    setLoading(true);
+    deleteSurveyField(data.id as string, surveyId as string)
+      .then(() => {
+        refetch();
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.log(err);
+        setLoading(false);
+      });
+  };
   return (
     <>
       {!edit && (
@@ -32,14 +53,19 @@ const TextField = ({ provided }: TextFieldProps) => {
               aria-label="Filter"
               onClick={() => setEdit(true)}
             />
+            <Button
+              icon="pi pi-trash"
+              rounded
+              loading={loading}
+              text
+              aria-label="delete"
+              onClick={handleDelete}
+            />
           </div>
           <Text className="mt-4 text-lg font-bold text-gray-800">
-            How do you like your shawarma?
+            {data.title}
           </Text>
-          <Text className="mb-4 text-sm">
-            Pizza is eaten different accross multiple people How do you like
-            your pizza?{" "}
-          </Text>
+          <Text className="mb-4 text-sm">{data.helperText}</Text>
           <InputTextarea
             autoResize
             onChange={(e) => console.log(e.target.value)}
@@ -49,7 +75,7 @@ const TextField = ({ provided }: TextFieldProps) => {
           />
         </>
       )}
-      {edit && <EditTextField setEdit={setEdit} />}
+      {edit && <EditSurveyField setEdit={setEdit} data={data} />}
     </>
   );
 };

@@ -7,11 +7,28 @@ import { DocumentDownloadIcon, PencilAltIcon } from "@heroicons/react/outline";
 import { useRouter } from "next/router";
 import RespondentsChart from "./RespondentsChart";
 import PollAnswerBarlist from "./PollAnswerBarlist";
+import { Poll } from "@prisma/client";
+import { getPollStats } from "../../../lib/apiCalls";
+import { useQuery } from "@tanstack/react-query";
 
-const PollTopAnalytics = () => {
+type Props = {
+  data: Poll;
+};
+
+const PollTopAnalytics = ({ data }: Props) => {
   const router = useRouter();
+  const { pollId } = router.query;
+
+  const {
+    data: stats,
+    isLoading,
+    isError,
+    error,
+    refetch,
+  } = useQuery(["stats"], () => getPollStats(String(pollId)));
+
   const handleEdit = (): void => {
-    router.push("/surveys/[surveyId]/edit", "/surveys/1/edit").catch((err) => {
+    router.push(`/polls/${pollId as string}/edit`).catch((err) => {
       console.error(err);
     });
   };
@@ -19,8 +36,8 @@ const PollTopAnalytics = () => {
     <>
       <Flex className="justify-between">
         <div>
-          <Title>Poll Title</Title>
-          <Text>An overview of your olls</Text>
+          <Title className="capitalize">{data.title}</Title>
+          <Text>An overview of your poll statistics and insights</Text>
         </div>
         <div>
           <Button icon={DocumentDownloadIcon} className="mt-4">
@@ -37,17 +54,23 @@ const PollTopAnalytics = () => {
       </Flex>
 
       {/* Main section */}
-      <Card className="mt-6">
-        <RespondentsChart />
-      </Card>
+      {!isLoading && !isError && (
+        <Card className="mt-6">
+          <RespondentsChart type="poll" />
+        </Card>
+      )}
 
       {/* KPI section */}
       <Grid numColsMd={2} className="mt-6 gap-6">
+        <Card>{!isLoading && !isError && <PollAnswerBarlist data={data.options} />}</Card>
         <Card>
-          <PollAnswerBarlist />
-        </Card>
-        <Card>
-          <ListChart type="polls" />
+          {!isLoading && !isError && (
+            <ListChart
+              type="polls"
+              countryWithMostResponses={stats.countriesWithMostResponses[0]}
+              data={stats.countriesWithMostResponses}
+            />
+          )}
         </Card>
       </Grid>
     </>

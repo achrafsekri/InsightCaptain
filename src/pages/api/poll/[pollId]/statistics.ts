@@ -1,19 +1,9 @@
 import { NextApiRequest, NextApiResponse } from "next";
-
 import { getServerSession } from "next-auth/next";
 import { prisma } from "../../../../server/db";
 import { formatResponse } from "../../../../shared/sharedFunctions";
-import { Poll, PollAnswer } from "@prisma/client";
-
-type stats = {
-  totalResponses?: number;
-  totalOptions?: number;
-  locationwithmostresponses?: string;
-};
-
-type locationwithmostresponses = {
-  [key: string]: number;
-};
+import type { Survey, SurveyAnswer } from "@prisma/client";
+import { ageGroups } from "../../../../shared/constants";
 
 export default async function handler(
   req: NextApiRequest,
@@ -22,73 +12,75 @@ export default async function handler(
   if (req.method === "GET") {
     try {
       const { pollId } = req.query;
-      const getPoll = await prisma.poll.findUnique({
+      const countriesWithMostResponses = prisma.pollAnswer.groupBy({
+        by: ["location"],
         where: {
-          id: String(pollId),
+          pollId: pollId as string,
         },
-        include: {
-          options: true,
+        _count: {
+          location: true,
         },
-      });
-      if (!getPoll) {
-        return res
-          .status(404)
-          .json(formatResponse(null, "Poll not found", "404"));
-      }
-
-      const getStats: stats = {};
-      const getResponses: PollAnswer[] = await prisma.pollAnswer.findMany({
-        where: {
-          pollId: String(pollId),
-        },
-        include: {
-          pickedOption: true,
-        },
-      });
-
-      getStats.totalResponses = getResponses.length;
-      getStats.totalOptions = getPoll.options.length;
-      const locationwithmostresponses: locationwithmostresponses =
-        getResponses.reduce(
-          (acc, curr) => {
-            if (curr.location === null) return acc;
-            if (acc[curr.location]) {
-              acc[curr.location] += 1;
-            } else {
-              acc[curr.location] = 1;
-            }
-            return acc;
+        orderBy: {
+          _count: {
+            location: "desc",
           },
-          { null: 0 } as { [key: string]: number }
-        );
-      locationwithmostresponses["null"] = 0; // if no location is provided
-      getStats.locationwithmostresponses = Object.keys(
-        locationwithmostresponses
-      ).reduce((a, b) => {
-        if (
-          locationwithmostresponses[a] !== undefined &&
-          locationwithmostresponses[b] !== undefined
-        ) {
-          // @ts-ignore
-          return locationwithmostresponses[a] > locationwithmostresponses[b]
-            ? a
-            : b;
-        }
-        return a; // or return some default value
+        },
+        take: 5,
+      });
+      const respondantsByAge = await prisma.pollAnswer.groupBy({
+        by: ["age"],
+        where: {
+          poll: {
+            id: pollId as string,
+          },
+        },
+        _count: {
+          age: true,
+        },
+        orderBy: {
+          _count: {
+            age: "desc",
+          },
+        },
+        take: 6,
+      });
+      const totalRespondants = await prisma.pollAnswer.count({
+        where: {
+          poll: {
+            id: pollId as string,
+          },
+        },
       });
 
-      return res
-        .status(200)
-        .json(formatResponse(getStats, "Statistics fetched", "200"));
-    } catch (error) {
-      console.log(error);
-      return res
+      const ageGroupsData = ageGroups.map((group) => {
+        const ageGroup = respondantsByAge.find((age) => {
+          return age.age >= group.over && age.age <= group.under;
+        });
+        if (ageGroup) {
+          return {
+            name: group.name,
+            value: ageGroup._count.age,
+            persantage: (ageGroup._count.age / totalRespondants) * 100,
+          };
+        }
+        return {
+          name: group.name,
+          value: 0,
+          persantage: 0,
+        };
+      });
+
+      const stats = {
+        countriesWithMostResponses:
+          countriesWithMostResponses == {} ? countriesWithMostResponses : [],
+        totalRespondants,
+        ageGroupsData,
+      };
+      res.status(200).json(formatResponse(stats, "Polll stats", "200"));
+    } catch {
+      res
         .status(500)
-        .json(formatResponse(null, "Internal server error", "500"));
+        .json(formatResponse(null, "Error getting poll stats", "400"));
     }
-  } else {
-    return res
-      .status(405)
-      .json(formatResponse(null, "Method not allowed", "405"));
   }
 }

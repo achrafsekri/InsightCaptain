@@ -6,9 +6,35 @@ import MainLayout from "../../layouts/MainLayout";
 import TopAnalytics from "../../components/page/polls/TopAnalytics";
 import PollTable from "../../components/page/polls/PollTable";
 import PollKeywords from "../../components/page/polls/PollKeywords";
+import { useQuery } from "@tanstack/react-query";
+import { getPollsByOrganization, getPollsStats } from "../../lib/apiCalls";
+import { useOrganization } from "../../Context/OrganizationContext";
+import { Poll } from "@prisma/client";
+import { SurveysStats } from "../../types/SurveyPollTypes";
 
 const Index = () => {
   const [OpenAddPollModale, setOpenAddPollModale] = useState(false);
+  const { currentOrganization } = useOrganization();
+
+  const {
+    data: polls,
+    isLoading,
+    isError,
+    error,
+    refetch,
+  } = useQuery<Poll[]>(["polls"], () =>
+    getPollsByOrganization(String(currentOrganization?.id))
+  );
+
+  const {
+    data: stats,
+    isLoading: statsLoading,
+    isError: statsIsError,
+    error: statsError,
+    refetch: statsRefetch,
+  } = useQuery<SurveysStats>(["stats"], () =>
+    getPollsStats(String(currentOrganization?.id))
+  );
   return (
     <MainLayout>
       {OpenAddPollModale && (
@@ -20,8 +46,8 @@ const Index = () => {
       <main className="mx-auto max-w-7xl p-4 md:p-10">
         <Flex className="justify-between">
           <div>
-            <Title>Poll Title</Title>
-            <Text>An overview of your olls</Text>
+            <Title>Polls</Title>
+            <Text>An overview of your polls statistics and insights</Text>
           </div>
           <div>
             <Button icon={DocumentDownloadIcon} className="mt-4">
@@ -36,9 +62,9 @@ const Index = () => {
             </Button>
           </div>
         </Flex>
-        <TopAnalytics />
+        {!statsLoading && stats && <TopAnalytics stats={stats} />}
         <Card className="mt-6">
-          <PollTable />
+          {!isLoading && polls && <PollTable polls={polls} />}
         </Card>
         <div className="mt-6">
           <PollKeywords />

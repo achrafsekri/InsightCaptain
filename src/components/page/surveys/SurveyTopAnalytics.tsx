@@ -5,11 +5,19 @@ import ListChart from "../../global/ListChart";
 import AgeGroupListChart from "../../global/AgeGroupListChart";
 import { DocumentDownloadIcon, PencilAltIcon } from "@heroicons/react/outline";
 import { useRouter } from "next/router";
+import SurveySentimentChart from "./SurveySentimentChart";
+import { type Survey } from "@prisma/client";
 
-const SurveyTopAnalytics = () => {
+type props = {
+  data: any;
+  survey: Survey;
+};
+
+const SurveyTopAnalytics = ({ data, survey }: props) => {
   const router = useRouter();
+  const { surveyId } = router.query;
   const handleEdit = (): void => {
-    router.push("/surveys/[surveyId]/edit", "/surveys/1/edit").catch((err) => {
+    router.push(`/surveys/${surveyId as string}/edit`).catch((err) => {
       console.error(err);
     });
   };
@@ -17,8 +25,8 @@ const SurveyTopAnalytics = () => {
     <>
       <Flex className="justify-between">
         <div>
-          <Title>Survey Title</Title>
-          <Text>An overview of your surveys</Text>
+          <Title>{survey?.title}</Title>
+          <Text>Mange and get insights and statistics about your survey</Text>
         </div>
         <div>
           <Button icon={DocumentDownloadIcon} className="mt-4">
@@ -42,12 +50,15 @@ const SurveyTopAnalytics = () => {
       {/* KPI section */}
       <Grid numColsMd={2} className="mt-6 gap-6">
         <Card>
-          <ListChart type="surveys" />
+          <ListChart type="surveys" data={data?.countriesWithMostResponses} />
         </Card>
         <Card>
-          <AgeGroupListChart type="surveys" />
+          <AgeGroupListChart type="surveys" data={data?.ageGroupsData}  />
         </Card>
       </Grid>
+      <Card className="mt-6">
+        <SurveySentimentChart sentimentData={data?.sentiments} />
+      </Card>
     </>
   );
 };

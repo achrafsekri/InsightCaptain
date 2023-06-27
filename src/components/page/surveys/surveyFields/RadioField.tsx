@@ -1,9 +1,13 @@
-import { Card, Text,Icon } from "@tremor/react";
+import { Card, Text, Icon } from "@tremor/react";
 import { Button } from "primereact/button";
 import { RadioButton } from "primereact/radiobutton";
 import React from "react";
-import EditRadioField from "./EditRadioField";
+import EditSurveyField from "./EditSurveyField";
 import { RxDragHandleDots2 } from "react-icons/rx";
+import { type SurveyFeild } from "@prisma/client";
+import { deleteSurveyField } from "../../../../lib/apiCalls";
+import { useRouter } from "next/router";
+import { useSingleSurvey } from "../../../../pages/surveys/[surveyId]/edit";
 
 type Provided = {
   innerRef: any;
@@ -13,16 +17,33 @@ type Provided = {
 
 type RadioFieldProps = {
   provided: Provided;
+  data: SurveyFeild;
 };
 
-const RadioOptions = [
-  { label: "Cheese", value: "Cheese" },
-  { label: "Pepperoni", value: "Pepperoni" },
-  { label: "Mushroom", value: "Mushroom" },
-];
+// const RadioOptions = [
+//   { label: "Cheese", value: "Cheese" },
+//   { label: "Pepperoni", value: "Pepperoni" },
+//   { label: "Mushroom", value: "Mushroom" },
+// ];
 
-const RadioField = ({ provided }: RadioFieldProps) => {
+const RadioField = ({ provided, data }: RadioFieldProps) => {
+  const router = useRouter();
+  const { surveyId } = router.query;
+  const { refetch } = useSingleSurvey();
   const [edit, setEdit] = React.useState<boolean>(false);
+  const [loading, setLoading] = React.useState<boolean>(false);
+  const handleDelete = () => {
+    setLoading(true);
+    deleteSurveyField(data.id, surveyId as string)
+      .then(() => {
+        refetch();
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.log(err);
+        setLoading(false);
+      });
+  };
   return (
     <>
       {!edit && (
@@ -38,35 +59,40 @@ const RadioField = ({ provided }: RadioFieldProps) => {
               aria-label="Filter"
               onClick={() => setEdit(true)}
             />
+            <Button
+              icon="pi pi-trash"
+              rounded
+              text
+              aria-label="delete"
+              onClick={handleDelete}
+              loading={loading}
+            />
           </div>
           <Text className="mt-4 text-lg font-bold text-gray-800">
-            How do you like your shawarma?
+            {data.title}
           </Text>
-          <Text className="text-sm">
-            Pizza is eaten different accross multiple people How do you like
-            your pizza?{" "}
-          </Text>
+          <Text className="text-sm">{data.helperText}</Text>
           <div className="mt-6 flex flex-col gap-3">
-            {RadioOptions.map((option, index) => (
+            {data.surveyFeildOption.map((option, index) => (
               <div key={index} className="flex items-center">
                 <RadioButton
-                  inputId={option.value}
-                  name={option.label}
+                  inputId={option.title}
+                  name={option.title}
                   checked={false}
-                  value={option.value}
+                  value={option.title}
                 />
                 <label
-                  htmlFor={option.value}
+                  htmlFor={option.title}
                   className="text-md ml-2 font-medium text-gray-600"
                 >
-                  {option.label}
+                  {option.title}
                 </label>
               </div>
             ))}
           </div>
         </>
       )}
-      {edit && <EditRadioField setEdit={setEdit} />}
+      {edit && <EditSurveyField setEdit={setEdit} data={data} />}
     </>
   );
 };

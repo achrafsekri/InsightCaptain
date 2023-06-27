@@ -3,7 +3,6 @@ import { Droppable } from "react-beautiful-dnd";
 type DropProps = {
   id: string;
   onDragEnd: (result: any) => void;
-  children: React.ReactNode;
 };
 
 export const Drop = ({ id, onDragEnd, ...props }: DropProps) => {

@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from "next";
-// 
+//
 import { getServerSession } from "next-auth/next";
 import { prisma } from "../../../../../server/db";
 import { formatResponse } from "../../../../../shared/sharedFunctions";
@@ -12,6 +12,7 @@ type expectedPostBody = {
   type: SurveyFeildType;
   helperText?: string;
   surveyFeildOptions?: SurveyFeildOption;
+  order: number;
 };
 
 export default async function handler(
@@ -19,7 +20,7 @@ export default async function handler(
   res: NextApiResponse
 ) {
   const { surveyId } = req.query;
-  const { title, type, helperText, surveyFeildOptions } =
+  const { title, type, helperText,order, surveyFeildOptions } =
     req.body as expectedPostBody;
 
   if (req.method === "POST") {
@@ -29,6 +30,7 @@ export default async function handler(
           title,
           type,
           helperText,
+          order,
           surveyFeildOption: {
             create: surveyFeildOptions,
           },

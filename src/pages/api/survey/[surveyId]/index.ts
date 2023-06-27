@@ -15,12 +15,17 @@ export default async function handler(
   if (req.method === "GET") {
     try {
       const { surveyId } = req.query;
+
       const getSurvey = await prisma.survey.findUnique({
         where: {
           id: String(surveyId),
         },
         include: {
-          surveyField: true,
+          surveyField: {
+            include: {
+              surveyFeildOption: true,
+            },
+          },
         },
       });
 
@@ -29,6 +34,8 @@ export default async function handler(
           .status(404)
           .json(formatResponse(null, "Survey not found", "404"));
       }
+      //order by survey field order
+      getSurvey.surveyField.sort((a, b) => a.order - b.order);
 
       return res.status(200).json(formatResponse(getSurvey, "Success", "201"));
     } catch {

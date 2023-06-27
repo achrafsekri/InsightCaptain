@@ -2,8 +2,12 @@ import { Card, Icon, Text } from "@tremor/react";
 import { Button } from "primereact/button";
 import { Checkbox } from "primereact/checkbox";
 import React from "react";
-import EditCheckBoxField from "./EditCheckBoxField";
+import EditSurveyField from "./EditSurveyField";
 import { RxDragHandleDots2 } from "react-icons/rx";
+import { SurveyFeild } from "@prisma/client";
+import { deleteSurveyField } from "../../../../lib/apiCalls";
+import { useRouter } from "next/router";
+import { useSingleSurvey } from "../../../../pages/surveys/[surveyId]/edit";
 
 type Provided = {
   innerRef: any;
@@ -13,16 +17,27 @@ type Provided = {
 
 type CheckBoxFieldProps = {
   provided: Provided;
+  data: SurveyFeild;
 };
 
-const checkBoxOptions = [
-  { label: "Cheese", value: "Cheese" },
-  { label: "Pepperoni", value: "Pepperoni" },
-  { label: "Mushroom", value: "Mushroom" },
-];
-
-const CheckBoxField = ({ provided }: CheckBoxFieldProps) => {
+const CheckBoxField = ({ provided, data }: CheckBoxFieldProps) => {
+  const router = useRouter();
+  const { surveyId } = router.query;
+  const { refetch } = useSingleSurvey();
   const [edit, setEdit] = React.useState<boolean>(false);
+  const [loading, setLoading] = React.useState<boolean>(false);
+  const handleDelete = () => {
+    setLoading(true);
+    deleteSurveyField(data.id as string, surveyId as string)
+      .then(() => {
+        refetch();
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.log(err);
+        setLoading(false);
+      });
+  };
   return (
     <>
       {!edit && (
@@ -39,35 +54,40 @@ const CheckBoxField = ({ provided }: CheckBoxFieldProps) => {
               aria-label="Filter"
               onClick={() => setEdit(true)}
             />
+            <Button
+              icon="pi pi-trash"
+              rounded
+              text
+              aria-label="delete"
+              onClick={handleDelete}
+              loading={loading}
+            />
           </div>
           <Text className="mt-4 text-lg font-bold text-gray-800">
-            How do you like your pizza?
+            {data.title}
           </Text>
-          <Text className="text-sm">
-            Pizza is eaten different accross multiple people How do you like
-            your pizza?{" "}
-          </Text>
+          <Text className="text-sm">{data.helperText}</Text>
           <div className="mt-6 flex flex-col gap-3">
-            {checkBoxOptions.map((option, index) => (
+            {data.surveyFeildOption.map((option, index) => (
               <div key={index} className="flex items-center">
                 <Checkbox
-                  inputId={option.value}
-                  name={option.label}
+                  inputId={option.title}
+                  name={option.title}
                   checked={false}
-                  value={option.value}
+                  value={option.title}
                 />
                 <label
-                  htmlFor={option.value}
+                  htmlFor={option.title}
                   className="text-md ml-2 font-medium text-gray-600"
                 >
-                  {option.label}
+                  {option.title}
                 </label>
               </div>
             ))}
           </div>
         </>
       )}
-      {edit && <EditCheckBoxField setEdit={setEdit} />}
+      {edit && <EditSurveyField setEdit={setEdit} data={data} />}
     </>
   );
 };

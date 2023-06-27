@@ -6,10 +6,16 @@ import { Controller, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { classNames } from "primereact/utils";
 import * as yup from "yup";
+import { createCaseStudy } from "../../../lib/apiCalls";
+import { useOrganization } from "../../../Context/OrganizationContext";
+import { useMutation } from "@tanstack/react-query";
+import { useCaseStudy } from "../../../Context/CaseStudyContext";
+import { useRouter } from "next/router";
+import { useToast } from "../../../Context/ToastContext";
 
 const schema = yup.object().shape({
   title: yup.string().required("Title is required."),
-  description: yup.string().required("description is required."),
+  description: yup.string(),
 });
 
 type FormData = yup.InferType<typeof schema>;
@@ -26,6 +32,10 @@ type Props = {
 
 export default function AddCaseStudyModal({ isOpen, setIsOpen }: Props) {
   const [loading, setLoading] = useState(false);
+  const { currentOrganization } = useOrganization();
+  const { refetch } = useCaseStudy();
+  const router = useRouter();
+  const showToast = useToast();
   const {
     register,
     handleSubmit,
@@ -37,17 +47,34 @@ export default function AddCaseStudyModal({ isOpen, setIsOpen }: Props) {
     resolver: yupResolver(schema),
   });
 
-  const getFormErrorMessage = (title: string) => {
-    return <small className="p-error">an error ocured</small>;
+  const getFormErrorMessage = (name: string) => {
+    return <small className="p-error mt-2">{errors[name]?.message}</small>;
   };
 
-  const onSubmit = handleSubmit((data) => {
-    console.log(data);
+  const onSubmit = (data: FormData) => {
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-    }, 2000);
-  });
+    const dataToSubmit = {
+      title: data.title,
+      description: data.description,
+    };
+
+
+    createCaseStudy(dataToSubmit, currentOrganization.id)
+      .then((res) => {
+        console.log(res);
+        refetch();
+        showToast("success", "Case study created");
+        router.push(`/caseStudies/${res?.id}`).catch((err) => {
+          console.log(err);
+        });
+        setIsOpen(false);
+      })
+      .catch((err) => {
+        console.log(err);
+        showToast("error", "Something went wrong");
+      });
+    setLoading(false);
+  };
 
   function closeModal() {
     setIsOpen(false);
@@ -86,20 +113,14 @@ export default function AddCaseStudyModal({ isOpen, setIsOpen }: Props) {
                 >
                   Create case study
                 </Dialog.Title>
-                <form
-                  onSubmit={() => {
-                    onSubmit().catch(() => {
-                      console.log("error");
-                    });
-                  }}
-                >
+                <form onSubmit={handleSubmit(onSubmit)}>
                   <div className="my-3 space-y-4">
                     <div>
                       <label
                         htmlFor="title"
                         className="text-900 mb-2 block font-medium"
                       >
-                        Title
+                        Title <span className="text-red-500">*</span>
                       </label>
 
                       <Controller
@@ -107,7 +128,7 @@ export default function AddCaseStudyModal({ isOpen, setIsOpen }: Props) {
                         control={control}
                         rules={{ required: "title is required." }}
                         render={({ field, fieldState }) => (
-                          <>
+                          <div className="flex flex-col">
                             {" "}
                             <InputText
                               {...field}
@@ -118,8 +139,8 @@ export default function AddCaseStudyModal({ isOpen, setIsOpen }: Props) {
                                 "p-invalid": fieldState.error,
                               })}
                             />
-                            {getFormErrorMessage("error")}
-                          </>
+                            {errors.title && getFormErrorMessage("title")}
+                          </div>
                         )}
                       />
                     </div>
@@ -129,7 +150,7 @@ export default function AddCaseStudyModal({ isOpen, setIsOpen }: Props) {
                         htmlFor="description"
                         className="text-900 mb-2 block font-medium"
                       >
-                        Description
+                        Description <span className="text-gray-400">(optional)</span>
                       </label>
 
                       <Controller
@@ -137,7 +158,7 @@ export default function AddCaseStudyModal({ isOpen, setIsOpen }: Props) {
                         control={control}
                         rules={{ required: "Description is required." }}
                         render={({ field, fieldState }) => (
-                          <>
+                          <div className="flex flex-col">
                             <InputText
                               {...field}
                               id="description"
@@ -147,15 +168,16 @@ export default function AddCaseStudyModal({ isOpen, setIsOpen }: Props) {
                                 "p-invalid": fieldState.error,
                               })}
                             />
-                            {getFormErrorMessage("error")}
-                          </>
+                            {errors.description &&
+                              getFormErrorMessage("description")}
+                          </div>
                         )}
                       />
                     </div>
                   </div>
 
                   <div className="mt-4 flex gap-3">
-                    <Button type="submit">Create </Button>
+                    <Button type="submit" loading={loading}>Create </Button>
                     <Button type="submit" variant="secondary" color="red">
                       Cancel{" "}
                     </Button>

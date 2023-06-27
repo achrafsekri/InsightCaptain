@@ -3,22 +3,19 @@ import { type Organization } from "@prisma/client";
 import { useUser } from "../auth/UserContext";
 import Loading from "../components/global/Loading";
 
+
 interface OrganizationContextType {
   currentOrganization: Organization;
   setCurrentOrganization: (organization: Organization) => void;
 }
-type Value = {
-  currentOrganization: Organization;
-  setCurrentOrganization: (organization: Organization) => void;
-};
 
-type OrganizationProviderProps = {
-  children: React.ReactNode;
-};
+
 
 export const OrganizationContext = createContext({
   currentOrganization: {} as Organization,
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   setCurrentOrganization: (organization: Organization) => {},
+
 });
 
 export const OrganizationProvider = ({
@@ -48,13 +45,21 @@ export const OrganizationProvider = ({
         );
     }
     setLoading(false);
-  }, [user]);
+  }, [user.organizations]);
+
+  
+
   if (loading) {
     return <Loading />;
   }
   return (
     <OrganizationContext.Provider
-      value={{ currentOrganization, setCurrentOrganization } as Value}
+      value={
+        {
+          currentOrganization,
+          setCurrentOrganization,
+        } as OrganizationContextType
+      }
     >
       {children}
     </OrganizationContext.Provider>

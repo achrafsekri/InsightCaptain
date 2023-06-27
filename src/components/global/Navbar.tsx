@@ -32,8 +32,6 @@ export default function Navbar({ user }: { user: User }) {
   const [switchOrganizationModalOpen, setSwitchOrganizationModalOpen] =
     useState(false);
 
-  console.log("user nav", user);
-
   const showToast = (state: string, organizationName: string) => {
     toast.current.show({
       severity: state,

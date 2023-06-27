@@ -10,10 +10,10 @@ const OrganizationWrapper = ({ children }: Props) => {
   const router = useRouter();
   const { user } = useUser();
   useEffect(() => {
-    if (!user?.organizations || user.organizations.length === 0) {
+    if (user.organizations.length === 0) {
       void router.push("/organization");
     }
-  }, [user,router]);
+  }, [user, router.pathname]);
   return <>{children}</>;
 };
 

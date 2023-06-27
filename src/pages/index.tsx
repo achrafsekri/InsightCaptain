@@ -8,8 +8,6 @@ import MainLayout from "../layouts/MainLayout";
 const Home: NextPage = () => {
   const { data: session } = useSession();
 
-  console.log(session);
-
   return (
     <MainLayout>
       <div>

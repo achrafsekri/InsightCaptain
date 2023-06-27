@@ -6,7 +6,8 @@ import { DocumentDownloadIcon, PlusCircleIcon } from "@heroicons/react/outline";
 import RespondentsChart from "./RespondentsChart";
 import AddPollModal from "./AddPollModal";
 
-const TopAnalytics = () => {
+
+const TopAnalytics = ({stats}) => {
   return (
     <>
       {/* Main section */}
@@ -17,10 +18,10 @@ const TopAnalytics = () => {
       {/* KPI section */}
       <Grid numColsMd={2} className="mt-6 gap-6">
         <Card>
-          <ListChart type="surveys" />
+          <ListChart type="polls" countryWithMostResponses={stats.countryWithMostResponses} data={stats.countriesWithMostResponses} />
         </Card>
         <Card>
-          <AgeGroupListChart type="surveys" />
+          <AgeGroupListChart type="polls" data={stats.ageGroupsData} />
         </Card>
       </Grid>
     </>

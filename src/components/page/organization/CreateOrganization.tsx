@@ -1,5 +1,5 @@
 import React from "react";
-import { Controller, useForm, Resolver } from "react-hook-form";
+import { Controller, useForm, Resolver, Field } from "react-hook-form";
 import { InputText } from "primereact/inputtext";
 import { Button } from "primereact/button";
 import { BiArrowBack } from "react-icons/bi";
@@ -13,10 +13,19 @@ import { Icon } from "@tremor/react";
 import { TrashIcon } from "@heroicons/react/outline";
 import { createOrganization } from "../../../lib/apiCalls";
 import { useUser } from "../../../auth/UserContext";
+import { useRouter } from "next/router";
 
 type FormValues = {
   avatar: string;
   name: string;
+};
+
+type res = {
+  fileUrl: string;
+};
+
+type Props = {
+  setStep: React.Dispatch<React.SetStateAction<string>>;
 };
 
 const resolver: Resolver<FormValues> = async (values) => {
@@ -34,10 +43,10 @@ const resolver: Resolver<FormValues> = async (values) => {
 };
 const { useUploadThing } = generateReactHelpers<OurFileRouter>();
 
-const CreateOrganization = ({ setStep }) => {
+const CreateOrganization = ({ setStep }: Props) => {
   const { user } = useUser();
-  const [avatar, setAvatar] = React.useState<File | null>(null);
   const [loading, setLoading] = React.useState<boolean>(false);
+  const router = useRouter();
   const {
     getRootProps,
     getInputProps,
@@ -61,15 +70,34 @@ const CreateOrganization = ({ setStep }) => {
     );
   };
   const onSubmit = handleSubmit((data) => {
+    setLoading(true);
+    if (files.length === 0) {
+      const sendData = {
+        name: data.name,
+        image: "",
+        userId: user?.id,
+      };
+      createOrganization(sendData)
+        .then((res) => {
+          setLoading(false);
+          router.push("/dashboard").catch((err) => console.log(err));
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    }
     startUpload()
-      .then((res) => {
+      .then((res: res[]) => {
         const sendData = {
           name: data.name,
-          image: typeof(res[0]) !== "undefined" ? res[0].fileUrl : "",
+          image: typeof res[0] !== "undefined" ? res[0].fileUrl : "",
           userId: user?.id,
         };
         createOrganization(sendData)
-          .then((res) => console.log(res))
+          .then((res) => {
+            setLoading(false);
+            router.push("/dashboard").catch((err) => console.log(err));
+          })
           .catch((err) => {
             console.log(err);
           });
@@ -77,10 +105,6 @@ const CreateOrganization = ({ setStep }) => {
       .catch((err) => {
         console.log(err);
       });
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-    }, 2000);
   });
   return (
     <div className="relative h-full w-full px-12 py-6">
@@ -104,7 +128,7 @@ const CreateOrganization = ({ setStep }) => {
             <div>
               {files.length > 0 && (
                 <Image
-                  src={files[0].contents}
+                  src={files[0]?.contents ? files[0]?.contents : ""}
                   alt="Image"
                   width="80"
                   height="60"

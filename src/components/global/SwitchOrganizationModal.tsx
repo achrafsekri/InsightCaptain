@@ -7,6 +7,7 @@ import { Organization, User, userOrganization } from "@prisma/client";
 import { Avatar } from "primereact/avatar";
 import { useOrganization } from "../../Context/OrganizationContext";
 import { Ripple } from "primereact/ripple";
+import { useRouter } from "next/router";
 
 type Props = {
   isOpen: boolean;
@@ -17,6 +18,7 @@ type Props = {
 const SwitchOrganizationModal = ({ isOpen, setIsOpen, showToast }: Props) => {
   const { currentOrganization, setCurrentOrganization } = useOrganization();
   const { user }: { user: User } = useUser();
+  const router = useRouter();
 
   function closeModal() {
     setIsOpen(false);
@@ -79,6 +81,9 @@ const SwitchOrganizationModal = ({ isOpen, setIsOpen, showToast }: Props) => {
                               "success",
                               organization.organization.name
                             );
+                            router.push("/").catch((err) => {
+                              console.log(err);
+                            });
                             setIsOpen(false);
                           }}
                           className={

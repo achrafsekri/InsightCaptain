@@ -1,6 +1,6 @@
 import { Card, Title, Text, Grid, Flex, Button } from "@tremor/react";
 import React, { useState, type MouseEvent } from "react";
-import SurveyeesChart from "./SurveyeesChart";
+import SurveyeesChart from "./SurveySurveyeesChart";
 import ListChart from "../../global/ListChart";
 import AgeGroupListChart from "../../global/AgeGroupListChart";
 import {
@@ -10,8 +10,14 @@ import {
 } from "@heroicons/react/outline";
 import { useRouter } from "next/router";
 import AddSurveyModal from "./AddSurveyModal";
+import { type SurveysStats } from "../../../types/SurveyPollTypes";
 
-const TopAnalytics = () => {
+type TopAnalyticsProps = {
+  statistics: SurveysStats;
+  refetch: () => void;
+};
+
+const TopAnalytics = ({ statistics, refetch }: TopAnalyticsProps) => {
   const [openAddSurveyModal, setOpenAddSurveyModal] = useState(false);
   return (
     <>
@@ -48,10 +54,14 @@ const TopAnalytics = () => {
       {/* KPI section */}
       <Grid numColsMd={2} className="mt-6 gap-6">
         <Card>
-          <ListChart type="surveys" />
+          <ListChart
+            type="surveys"
+            data={statistics.countriesWithMostResponses}
+            countryWithMostResponses={statistics.CountryWithMostResponses}
+          />
         </Card>
         <Card>
-          <AgeGroupListChart type="surveys" />
+          <AgeGroupListChart type="surveys" data={statistics.ageGroupsData} />
         </Card>
       </Grid>
     </>

@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from "next";
-// 
+//
 import { getServerSession } from "next-auth/next";
 import { prisma } from "../../../../../server/db";
 import { formatResponse } from "../../../../../shared/sharedFunctions";
@@ -7,7 +7,7 @@ import { type SurveyFeildType } from "@prisma/client";
 
 type Body = {
   title: string;
-  type: SurveyFeildType;
+  order: number;
   helperText: string;
 };
 
@@ -23,6 +23,7 @@ export default async function handler(
           id: String(surveyFieldId),
         },
       });
+
       return res
         .status(200)
         .json(formatResponse(surveyField, "Success", "201"));
@@ -34,7 +35,7 @@ export default async function handler(
   }
 
   if (req.method === "PATCH") {
-    const { title, type, helperText } = req.body as Body;
+    const { title, helperText, order } = req.body as Body;
     try {
       const surveyField = await prisma.surveyFeild.update({
         where: {
@@ -42,8 +43,8 @@ export default async function handler(
         },
         data: {
           title,
-          type,
           helperText,
+          order,
         },
       });
       return res

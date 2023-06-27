@@ -107,6 +107,7 @@ model Poll {
     caseStudyId    String
     totalVotes     Int          @default(0)
     options        PollOption[]
+    pollAnswers    PollAnswer[]
     caseStudy      CaseStudy    @relation(fields: [caseStudyId], references: [id], onDelete: Cascade)
     organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
     createdAt      DateTime     @default(now())
@@ -125,14 +126,17 @@ model PollOption {
 }
 
 model PollAnswer {
-    id           String     @id @default(cuid())
-    pollId       String
-    location     String?
-    ipAddress    String?
-    pickedOption PollOption @relation(fields: [pollOptionId], references: [id])
-    createdAt    DateTime   @default(now())
-    updatedAt    DateTime   @updatedAt
-    pollOptionId String
+    id             String     @id @default(cuid())
+    pollId         String
+    poll           Poll       @relation(fields: [pollId], references: [id], onDelete: Cascade)
+    location       String?
+    ipAddress      String?
+    age            Int?
+    pickedOption   PollOption @relation(fields: [pollOptionId], references: [id])
+    createdAt      DateTime   @default(now())
+    createdAtMonth Int?       @map("MONTH(createdAt)")
+    updatedAt      DateTime   @updatedAt
+    pollOptionId   String
 }
 
 model SurveyFeild {
@@ -184,23 +188,26 @@ model SurveyAnswer {
     sentiment         Sentiment           @default(NEUTRAL)
     requested         String?
     surveyId          String
+    survey            Survey              @relation(fields: [surveyId], references: [id], onDelete: Cascade)
     surveyFeildAnswer SurveyFeildAnswer[]
     createdAt         DateTime            @default(now())
+    createdAtMonth    Int                 @map("MONTH(createdAt)")
     updatedAt         DateTime            @updatedAt
 }
 
 model Survey {
-    id             String        @id @default(cuid())
+    id             String         @id @default(cuid())
     title          String
     description    String
     topic          String?
     organizationId String
     caseStudyId    String
+    SurveyAnswer   SurveyAnswer[]
     surveyField    SurveyFeild[]
-    caseStudy      CaseStudy     @relation(fields: [caseStudyId], references: [id], onDelete: Cascade)
-    organization   Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-    createdAt      DateTime      @default(now())
-    updatedAt      DateTime      @updatedAt
+    caseStudy      CaseStudy      @relation(fields: [caseStudyId], references: [id], onDelete: Cascade)
+    organization   Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+    createdAt      DateTime       @default(now())
+    updatedAt      DateTime       @updatedAt
 }
 
 model CaseStudy {

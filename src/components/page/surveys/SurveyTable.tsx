@@ -19,65 +19,13 @@ import { TrashIcon } from "@heroicons/react/outline";
 import { Ripple } from "primereact/ripple";
 import { InputText } from "primereact/inputtext";
 import AddSurveyModal from "./AddSurveyModal";
+import { type Survey } from "@prisma/client";
 
-const surveys = [
-  {
-    id: "0",
-    title: "survey1",
-    description: "smalll description",
-    numberOfRespondats: "300",
-  },
-  {
-    id: "1",
-    title: "survey2",
-    description: "smalll description",
-    numberOfRespondats: "300",
-  },
-  {
-    id: "2",
-    title: "survey3",
-    description: "smalll description",
-    numberOfRespondats: "300",
-  },
-  {
-    id: "3",
-    title: "survey4",
-    description: "smalll description",
-    numberOfRespondats: "300",
-  },
-  {
-    id: "4",
-    title: "survey5",
-    description: "smalll description",
-    numberOfRespondats: "300",
-  },
-  {
-    id: "5",
-    title: "survey6",
-    description: "smalll description",
-    numberOfRespondats: "300",
-  },
-  {
-    id: "6",
-    title: "survey4",
-    description: "smalll description",
-    numberOfRespondats: "300",
-  },
-  {
-    id: "7",
-    title: "survey5",
-    description: "smalll description",
-    numberOfRespondats: "300",
-  },
-  {
-    id: "8",
-    title: "survey6",
-    description: "smalll description",
-    numberOfRespondats: "300",
-  },
-];
+type Props = {
+  surveys: Survey[] | undefined;
+};
 
-const SurveyTable = () => {
+const SurveyTable = ({ surveys }: Props) => {
   const [OpenAddSurveyModale, setOpenAddSurveyModale] = useState(false);
   const [searchValue, setSearchValue] = useState("");
 
@@ -103,9 +51,8 @@ const SurveyTable = () => {
         <div>
           <Flex justifyContent="start" className="space-x-2">
             <Title>Surveys</Title>
-            <Badge color="gray">8</Badge>
+            <Badge color="gray">{surveys?.length}</Badge>
           </Flex>
-          <Text className="mt-2">Case study name</Text>
         </div>
         <span className="p-input-icon-left relative">
           <i className="pi pi-search absolute left-0 top-7" />
@@ -139,28 +86,29 @@ const SurveyTable = () => {
         </TableHead>
 
         <TableBody>
-          {filteredSurveys.map((item, index) => (
-            <TableRow key={index}>
-              <TableCell>{item.title}</TableCell>
-              <TableCell>{index + 1}</TableCell>
-              <TableCell>{item.numberOfRespondats}</TableCell>
+          {filteredSurveys &&
+            filteredSurveys.map((item, index) => (
+              <TableRow key={index}>
+                <TableCell>{item.title}</TableCell>
+                <TableCell>{item.caseStudy.title}</TableCell>
+                <TableCell>{item._count.SurveyAnswer}</TableCell>
 
-              <TableCell>
-                <Button size="xs" variant="secondary" color="gray">
-                  <Link href={`/surveys/${item.id}`}>See details</Link>
-                </Button>
-              </TableCell>
-              <TableCell>
-                <button
-                  onClick={() => handleDelete(item.id)}
-                  className="flex items-center justify-center rounded-lg p-2 text-red-400 hover:bg-red-500 hover:text-white"
-                >
-                  <TrashIcon className="h-5 w-5" />
-                  <Ripple />
-                </button>
-              </TableCell>
-            </TableRow>
-          ))}
+                <TableCell>
+                  <Button size="xs" variant="secondary" color="gray">
+                    <Link href={`/surveys/${item.id}`}>See details</Link>
+                  </Button>
+                </TableCell>
+                <TableCell>
+                  <button
+                    onClick={() => handleDelete(item.id)}
+                    className="flex items-center justify-center rounded-lg p-2 text-red-400 hover:bg-red-500 hover:text-white"
+                  >
+                    <TrashIcon className="h-5 w-5" />
+                    <Ripple />
+                  </button>
+                </TableCell>
+              </TableRow>
+            ))}
         </TableBody>
       </Table>
     </Card>
