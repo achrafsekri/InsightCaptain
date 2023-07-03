@@ -11,7 +11,7 @@ export const ToastProvider = ({ children }) => {
       severity: state,
       summary: state,
       detail: message,
-      life: 1500,
+      life: 1500, 
     });
   };
 

@@ -7,6 +7,7 @@ import { DocumentDownloadIcon, PencilAltIcon } from "@heroicons/react/outline";
 import { useRouter } from "next/router";
 import SurveySentimentChart from "./SurveySentimentChart";
 import { type Survey } from "@prisma/client";
+import Keywords from "../../global/Keywords";
 
 type props = {
   data: any;
@@ -29,9 +30,6 @@ const SurveyTopAnalytics = ({ data, survey }: props) => {
           <Text>Mange and get insights and statistics about your survey</Text>
         </div>
         <div>
-          <Button icon={DocumentDownloadIcon} className="mt-4">
-            Export
-          </Button>
           <Button
             icon={PencilAltIcon}
             className="mt-4 ml-2"
@@ -50,10 +48,14 @@ const SurveyTopAnalytics = ({ data, survey }: props) => {
       {/* KPI section */}
       <Grid numColsMd={2} className="mt-6 gap-6">
         <Card>
-          <ListChart type="surveys" data={data?.countriesWithMostResponses} />
+          <ListChart
+            type="surveys"
+            data={data?.countriesWithMostResponses}
+            countryWithMostResponses={data?.countryWithMostResponses}
+          />
         </Card>
         <Card>
-          <AgeGroupListChart type="surveys" data={data?.ageGroupsData}  />
+          <AgeGroupListChart type="surveys" data={data?.ageGroupsData} />
         </Card>
       </Grid>
       <Card className="mt-6">

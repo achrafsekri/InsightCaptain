@@ -17,7 +17,17 @@ export default async function handler(
             id: String(answerId),
           },
           include: {
-            surveyFeildAnswer: true,
+            survey: true,
+            surveyFeildAnswer: {
+              include: {
+                pickedOptions: true,
+                surveyFeild: {
+                  include: {
+                    surveyFeildOption: true,
+                  },
+                },
+              },
+            },
           },
         });
       if (!surveyAnswer) {

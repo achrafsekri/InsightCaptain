@@ -68,9 +68,7 @@ const SurveyField = () => {
     helperText: Yup.string(),
     selectedOption: Yup.string()
       .oneOf(["Checkbox", "Radio", "Text"])
-      .required('Please select a Field Type'),
-    
-
+      .required("Please select a Field Type"),
   });
   const {
     register,
@@ -104,12 +102,13 @@ const SurveyField = () => {
       createSurveyField(packageData, surveyId as string)
         .then((res) => {
           refetch();
-          setAddSurveyField(false);
+          setPickedQuestion("");
           setCheckboxOptions([{ title: "", value: "" }]);
           setRadioOptions([{ title: "", value: "" }]);
           setSelectedOption(null);
           setLoading(false);
           showToast("success", "Survey field added successfully");
+          setAddSurveyField(false);
         })
         .catch((err) => {
           setLoading(false);
@@ -135,11 +134,13 @@ const SurveyField = () => {
       createSurveyField(packageData, surveyId as string)
         .then((res) => {
           refetch();
-          setAddSurveyField(false);
+          setPickedQuestion("");
           setCheckboxOptions([{ title: "", value: "" }]);
           setRadioOptions([{ title: "", value: "" }]);
           setSelectedOption(null);
           setLoading(false);
+          showToast("success", "Survey field added successfully");
+          setAddSurveyField(false);
         })
         .catch((err) => {
           setLoading(false);
@@ -164,11 +165,13 @@ const SurveyField = () => {
       createSurveyField(packageData, surveyId as string)
         .then((res) => {
           refetch();
-          setAddSurveyField(false);
+          setPickedQuestion("");
           setCheckboxOptions([{ title: "", value: "" }]);
           setRadioOptions([{ title: "", value: "" }]);
           setSelectedOption(null);
           setLoading(false);
+          showToast("success", "Survey field added successfully");
+          setAddSurveyField(false);
         })
         .catch((err) => {
           setLoading(false);

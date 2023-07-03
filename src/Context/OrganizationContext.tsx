@@ -3,19 +3,15 @@ import { type Organization } from "@prisma/client";
 import { useUser } from "../auth/UserContext";
 import Loading from "../components/global/Loading";
 
-
 interface OrganizationContextType {
   currentOrganization: Organization;
   setCurrentOrganization: (organization: Organization) => void;
 }
 
-
-
 export const OrganizationContext = createContext({
   currentOrganization: {} as Organization,
   // eslint-disable-next-line @typescript-eslint/no-empty-function
   setCurrentOrganization: (organization: Organization) => {},
-
 });
 
 export const OrganizationProvider = ({
@@ -46,8 +42,6 @@ export const OrganizationProvider = ({
     }
     setLoading(false);
   }, [user.organizations]);
-
-  
 
   if (loading) {
     return <Loading />;

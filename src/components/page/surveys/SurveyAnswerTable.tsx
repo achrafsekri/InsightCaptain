@@ -76,8 +76,9 @@ const SurveyAnswerTable = ({ data }: Props) => {
           <TableRow>
             <TableHeaderCell>Survey answer Id</TableHeaderCell>
             <TableHeaderCell>Name</TableHeaderCell>
+            <TableHeaderCell>Email</TableHeaderCell>
             <TableHeaderCell>Response date</TableHeaderCell>
-            <TableHeaderCell>Preview response</TableHeaderCell>
+            <TableHeaderCell>View response</TableHeaderCell>
           </TableRow>
         </TableHead>
 
@@ -86,11 +87,11 @@ const SurveyAnswerTable = ({ data }: Props) => {
             <TableRow key={index}>
               <TableCell>{index + 1}</TableCell>
               <TableCell>{item.fullName}</TableCell>
+              <TableCell>{item.email}</TableCell>
               <TableCell>{formatDate(item.createdAt)}</TableCell>
-
               <TableCell>
                 <Button size="xs" variant="secondary" color="gray">
-                  <Link href={`/surveys/${item.id}`}>See Response</Link>
+                  <Link href={`/surveys/response/${item.id}`}>See Response</Link>
                 </Button>
               </TableCell>
               

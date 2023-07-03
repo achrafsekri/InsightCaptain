@@ -1,4 +1,4 @@
-import { SurveyFeild, type User } from "@prisma/client";
+import { Role, SurveyFeild, type User } from "@prisma/client";
 import axios from "axios";
 import { baseUrl } from "../shared/constants";
 import { type CaseStudy } from "@prisma/client";
@@ -6,6 +6,19 @@ import { type CreateOrganizationBody } from "../types/apiCalls";
 import { prisma } from "../server/db";
 import { SurveysStats } from "../types/SurveyPollTypes";
 import { DateRangePickerValue } from "@tremor/react";
+
+export const getLocation = async () => {
+  const regionNames = new Intl.DisplayNames(["en"], { type: "region" });
+  const response = await axios.get("https://api.country.is").then((res) => {
+    const country = regionNames.of(res.data.country as string);
+    return {
+      country: country,
+      countryCode: res.data.country,
+      ip: res.data.ip,
+    };
+  });
+  return response;
+};
 
 export const getUser = async (userId: string | undefined) => {
   const response = await axios
@@ -53,6 +66,29 @@ export const createOrganization = async (data) => {
   }
 };
 
+export const editOrganization = async (
+  organizationId: string,
+  data: {
+    name: string;
+    image?: string;
+  }
+) => {
+  const packageData = JSON.stringify(data);
+  const config = {
+    method: "patch",
+    maxBodyLength: Infinity,
+    url: `${baseUrl}/api/organization/${organizationId}`,
+    headers: {
+      "Content-Type": "application/json",
+    },
+    data: packageData,
+  };
+  const response = await axios.request(config).catch((error) => {
+    console.log(error);
+  });
+  return response.data;
+};
+
 //! fix server error
 
 export const joinOrganization = async (
@@ -62,16 +98,74 @@ export const joinOrganization = async (
   const data = JSON.stringify({
     userId,
   });
-  console.log(data);
+  const config = {
+    method: "post",
+    maxBodyLength: Infinity,
+    url: `${baseUrl}/api/organization/join/${invitation}`,
+    headers: {
+      "Content-Type": "application/json",
+    },
+    data: data,
+  };
+  const response = await axios.request(config).catch((error) => {
+    console.log(error);
+  });
+  return response.data;
+};
+
+export const RemoveUserFromOrganization = async (
+  organizationId: string,
+  userId: string
+) => {
   const response = await axios
-    .post(`${baseUrl}/api/organization/join/${invitation}`, data)
+    .delete(`${baseUrl}/api/organization/${organizationId}/users/${userId}`)
     .catch((error) => {
       console.log(error);
     });
+  return response.data;
+};
 
-  if (response && response.data) {
-    return response.data;
-  }
+export const inviteUserToOrganization = async (
+  organizationId: string,
+  email: string,
+  role: Role
+) => {
+  const data = JSON.stringify({
+    email,
+    organizationId: organizationId,
+    role,
+  });
+  const config = {
+    method: "post",
+    maxBodyLength: Infinity,
+    url: `${baseUrl}/api/invite`,
+    headers: {
+      "Content-Type": "application/json",
+    },
+    data: data,
+  };
+  const response = await axios.request(config).catch((error) => {
+    console.log(error);
+  });
+  return response.data;
+};
+
+export const getOrganizationInvitations = async (organizationId: string) => {
+  const response = await axios
+    .get(`${baseUrl}/api/organization/${organizationId}/invitations`)
+    .catch((error) => {
+      console.log(error);
+    });
+  return response.data.data;
+};
+
+export const deleteOrganizationInvitation = async (invitationId: string) => {
+  const response = await axios
+    .delete(`${baseUrl}/api/invite/${invitationId}`)
+    .catch((error) => {
+      console.log(error);
+    });
+  return response.data;
 };
 
 // stats
@@ -90,11 +184,41 @@ export const organizationStats = async (organizationId: string) => {
   }
 };
 
+export const getUsers = async (organizationId: string) => {
+  const response = await axios
+    .get(`${baseUrl}/api/organization/${organizationId}/users`)
+    .catch((error) => {
+      console.log(error);
+    });
+  return response.data.data;
+};
+
+export const updateUserRole = async (
+  organizationId: string,
+  userId: string,
+  role: Role
+) => {
+  const data = JSON.stringify({
+    role,
+  });
+  const config = {
+    method: "patch",
+    maxBodyLength: Infinity,
+    url: `${baseUrl}/api/organization/${organizationId}/users/${userId}`,
+    headers: {
+      "Content-Type": "application/json",
+    },
+    data: data,
+  };
+  const response = await axios.request(config).catch((error) => {
+    console.log(error);
+  });
+  return response.data;
+};
 // caseStudies
 
 export const createCaseStudy = async (data, organizationId: string) => {
   const packageData = JSON.stringify(data);
-  console.log(packageData);
   let config = {
     method: "post",
     maxBodyLength: Infinity,
@@ -270,6 +394,7 @@ export const getSurveyStats = async (surveyId: string) => {
 };
 
 export const deleteSurvey = async (surveyId: string) => {
+  console.log("surveyId", surveyId);
   const response = await axios
     .delete(`${baseUrl}/api/survey/${surveyId}`)
     .catch((error) => {
@@ -281,6 +406,25 @@ export const deleteSurvey = async (surveyId: string) => {
 export const getSurveyAnswers = async (surveyId: string) => {
   const response = await axios
     .get(`${baseUrl}/api/survey/${surveyId}/answer`)
+    .catch((error) => {
+      console.log(error);
+    });
+  return response.data.data;
+};
+
+export const getSurveyKeywords = async (surveyId: string) => {
+  const response = await axios
+    .get(`${baseUrl}/api/survey/${surveyId}/keywords`)
+    .catch((error) => {
+      console.log(error);
+    });
+  console.log(response.data);
+  return response.data.data;
+};
+
+export const getSurveyResponseById = async (responseId: string) => {
+  const response = await axios
+    .get(`${baseUrl}/api/survey/ab/answer/${responseId}`)
     .catch((error) => {
       console.log(error);
     });
@@ -389,6 +533,7 @@ export const getPollsByOrganization = async (organizationId: string) => {
     });
   return response.data.data;
 };
+
 export const getPollsStats = async (organizationId: string) => {
   const data = JSON.stringify({
     organizationId,
@@ -408,7 +553,7 @@ export const getPollsStats = async (organizationId: string) => {
   return response.data.data;
 };
 
-export const getPollsRespondantsHistory  = async (
+export const getPollsRespondantsHistory = async (
   organizationId: string,
   range: DateRangePickerValue
 ) => {
@@ -494,6 +639,7 @@ export const updatePoll = async (pollId: string, data) => {
   const response = await axios.request(config).catch((error) => {
     console.log(error);
   });
+  console.log(response.data);
   return response.data.data;
 };
 
@@ -503,5 +649,51 @@ export const deletePoll = async (pollId: string) => {
     .catch((error) => {
       console.log(error);
     });
+  return response.data;
+};
+
+export const getPollResponseById = async (responseId: string) => {
+  const response = await axios
+    .get(`${baseUrl}/api/poll/ab/answer/${responseId}`)
+    .catch((error) => {
+      console.log(error);
+    });
+  return response.data.data;
+};
+
+// respond to poll
+
+export const respondToPoll = async (data) => {
+  const packageData = JSON.stringify(data);
+  let config = {
+    method: "post",
+    maxBodyLength: Infinity,
+    url: `${baseUrl}/api/poll/answer`,
+    headers: {
+      "Content-Type": "application/json",
+    },
+    data: packageData,
+  };
+  const response = await axios.request(config).catch((error) => {
+    console.log(error);
+  });
+  return response.data;
+};
+
+// respond to survey
+export const respondToSurvey = async (data, surveyId: string) => {
+  const packageData = JSON.stringify(data);
+  let config = {
+    method: "post",
+    maxBodyLength: Infinity,
+    url: `${baseUrl}/api/survey/${surveyId}/answer`,
+    headers: {
+      "Content-Type": "application/json",
+    },
+    data: packageData,
+  };
+  const response = await axios.request(config).catch((error) => {
+    console.log(error);
+  });
   return response.data;
 };

@@ -102,12 +102,14 @@ model invite {
 model Poll {
     id             String       @id @default(cuid())
     title          String
+    question       String?
+    helperText     String?
     pollType       PollType     @default(SINGLE)
     organizationId String
     caseStudyId    String
     totalVotes     Int          @default(0)
     options        PollOption[]
-    pollAnswers    PollAnswer[]
+    pollAnswers    PollAnswer[] 
     caseStudy      CaseStudy    @relation(fields: [caseStudyId], references: [id], onDelete: Cascade)
     organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
     createdAt      DateTime     @default(now())
@@ -128,11 +130,13 @@ model PollOption {
 model PollAnswer {
     id             String     @id @default(cuid())
     pollId         String
-    poll           Poll       @relation(fields: [pollId], references: [id], onDelete: Cascade)
+    poll           Poll       @relation(fields: [pollId], references: [id])
+    email          String?
+    name           String?
     location       String?
     ipAddress      String?
     age            Int?
-    pickedOption   PollOption @relation(fields: [pollOptionId], references: [id])
+    pickedOption   PollOption @relation(fields: [pollOptionId], references: [id], onDelete: Cascade)
     createdAt      DateTime   @default(now())
     createdAtMonth Int?       @map("MONTH(createdAt)")
     updatedAt      DateTime   @updatedAt
@@ -160,11 +164,10 @@ model SurveyFeildAnswer {
     answer         String?
     createdAt      DateTime            @default(now())
     updatedAt      DateTime            @updatedAt
-    surveyFeild    SurveyFeild?        @relation(fields: [surveyFeildId], references: [id])
-    surveyAnswer   SurveyAnswer?       @relation(fields: [surveyAnswerId], references: [id])
+    surveyFeild    SurveyFeild?        @relation(fields: [surveyFieldId], references: [id], onDelete: Cascade)
+    surveyAnswer   SurveyAnswer?       @relation(fields: [surveyAnswerId], references: [id], onDelete: Cascade)
     surveyAnswerId String?
     pickedOptions  SurveyFeildOption[]
-    surveyFeildId  String?
 }
 
 model SurveyFeildOption {

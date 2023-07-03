@@ -13,6 +13,7 @@ import {
   Button,
   Color,
 } from "@tremor/react";
+import { Button as PrimeButton } from "primereact/button";
 import Link from "next/link";
 import { useState } from "react";
 import { TrashIcon } from "@heroicons/react/outline";
@@ -20,14 +21,21 @@ import { Ripple } from "primereact/ripple";
 import { InputText } from "primereact/inputtext";
 import AddSurveyModal from "./AddSurveyModal";
 import { type Survey } from "@prisma/client";
+import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
+import { useToast } from "../../../Context/ToastContext";
+import { deleteSurvey } from "../../../lib/apiCalls";
 
 type Props = {
   surveys: Survey[] | undefined;
+  refetch: () => void;
 };
 
-const SurveyTable = ({ surveys }: Props) => {
+const SurveyTable = ({ surveys, refetch }: Props) => {
   const [OpenAddSurveyModale, setOpenAddSurveyModale] = useState(false);
   const [searchValue, setSearchValue] = useState("");
+  const [id, setId] = useState("");
+  const [loading, setLoading] = useState(false);
+  const showToast = useToast();
 
   const filteredSurveys = surveys.filter((survey) =>
     survey.title.toLowerCase().includes(searchValue.toLowerCase())
@@ -39,8 +47,37 @@ const SurveyTable = ({ surveys }: Props) => {
   const handleDelete = (surveyId) => {
     // delete survey logic here
   };
+  const accept = () => {
+    setLoading(true);
+    deleteSurvey(id)
+      .then((res) => {
+        refetch();
+        showToast("success", "Survey deleted successfully");
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.log(err);
+        showToast("error", "Something went wrong");
+        setLoading(false);
+      });
+  };
+
+  const reject = () => {
+    showToast("error", "You have rejected");
+  };
+
+  const confirm = () => {
+    confirmDialog({
+      message: "Are you sure you want to delete this survey?",
+      header: "Confirmation",
+      icon: "pi pi-exclamation-triangle",
+      accept,
+      reject,
+    });
+  };
   return (
     <Card>
+      <ConfirmDialog />
       {OpenAddSurveyModale && (
         <AddSurveyModal
           isOpen={OpenAddSurveyModale}
@@ -81,7 +118,7 @@ const SurveyTable = ({ surveys }: Props) => {
             <TableHeaderCell>Case study</TableHeaderCell>
             <TableHeaderCell>N° respondants</TableHeaderCell>
             <TableHeaderCell>Link</TableHeaderCell>
-            <TableHeaderCell>Action</TableHeaderCell>
+            {/* <TableHeaderCell>Action</TableHeaderCell> */}
           </TableRow>
         </TableHead>
 
@@ -98,15 +135,22 @@ const SurveyTable = ({ surveys }: Props) => {
                     <Link href={`/surveys/${item.id}`}>See details</Link>
                   </Button>
                 </TableCell>
-                <TableCell>
-                  <button
-                    onClick={() => handleDelete(item.id)}
+                {/* <TableCell>
+                  <PrimeButton
+                    onClick={() => {
+                      setId(item.id);
+                      setTimeout(() => {}, 300);
+                      confirm();
+                    }}
+                    loading={loading}
+                    text
+                    severity="danger"
+                    icon={<TrashIcon className="h-5 w-5" />}
                     className="flex items-center justify-center rounded-lg p-2 text-red-400 hover:bg-red-500 hover:text-white"
                   >
-                    <TrashIcon className="h-5 w-5" />
                     <Ripple />
-                  </button>
-                </TableCell>
+                  </PrimeButton>
+                </TableCell> */}
               </TableRow>
             ))}
         </TableBody>

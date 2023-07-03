@@ -58,7 +58,6 @@ export default function AddCaseStudyModal({ isOpen, setIsOpen }: Props) {
       description: data.description,
     };
 
-
     createCaseStudy(dataToSubmit, currentOrganization.id)
       .then((res) => {
         console.log(res);
@@ -68,12 +67,13 @@ export default function AddCaseStudyModal({ isOpen, setIsOpen }: Props) {
           console.log(err);
         });
         setIsOpen(false);
+        setLoading(false);
       })
       .catch((err) => {
         console.log(err);
+        setLoading(false);
         showToast("error", "Something went wrong");
       });
-    setLoading(false);
   };
 
   function closeModal() {
@@ -150,7 +150,8 @@ export default function AddCaseStudyModal({ isOpen, setIsOpen }: Props) {
                         htmlFor="description"
                         className="text-900 mb-2 block font-medium"
                       >
-                        Description <span className="text-gray-400">(optional)</span>
+                        Description{" "}
+                        <span className="text-gray-400">(optional)</span>
                       </label>
 
                       <Controller
@@ -177,7 +178,9 @@ export default function AddCaseStudyModal({ isOpen, setIsOpen }: Props) {
                   </div>
 
                   <div className="mt-4 flex gap-3">
-                    <Button type="submit" loading={loading}>Create </Button>
+                    <Button type="submit" loading={loading}>
+                      Create{" "}
+                    </Button>
                     <Button type="submit" variant="secondary" color="red">
                       Cancel{" "}
                     </Button>

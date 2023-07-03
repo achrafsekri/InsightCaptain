@@ -2,7 +2,7 @@ import { NextApiRequest, NextApiResponse } from "next";
 import { getServerSession } from "next-auth/next";
 import { prisma } from "../../../../server/db";
 import { formatResponse } from "../../../../shared/sharedFunctions";
-
+import { NumericMonth } from "../../../../shared/constants";
 
 type Body = {
   range: string;
@@ -204,9 +204,16 @@ export default async function handler(
             lastYear[i] = groupByMonth.date[i];
           }
         }
+        const lastYearEntries = Object.entries(lastYear);
+        const lastYearEntriesWithMonthName = lastYearEntries.map((entry) => {
+          const [key, value] = entry;
+          const monthName = NumericMonth[key];
+          return [monthName, value];
+        });
+
         res
           .status(200)
-          .json(formatResponse(Object.entries(lastYear), "Success", "200"));
+          .json(formatResponse(lastYearEntriesWithMonthName, "Success", "200"));
       }
 
       if (metric === "t") {

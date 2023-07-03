@@ -54,8 +54,7 @@ export default async function handler(
         headers: {
           "Content-Type": "application/json",
           Accept: "application/json",
-          Authorization:
-            "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiMGZkNDliZGYtNjJhOS00NzljLWE0YWYtYzhlMDdmZDhmODc5IiwidHlwZSI6ImFwaV90b2tlbiJ9.miFu0-Y2sjNTfvgsZf-GprLREvO9wTC1GiB0c6EzfgI",
+          Authorization: ` Bearer ${process.env.EDEN_API_KEY}`,
         },
         data: data,
       };

@@ -7,6 +7,8 @@ import { classNames } from "primereact/utils";
 import Image from "next/image";
 import { joinOrganization } from "../../../lib/apiCalls";
 import { useUser } from "../../../auth/UserContext";
+import { useRouter } from "next/router";
+import { useToast } from "../../../Context/ToastContext";
 
 type FormValues = {
   code: string;
@@ -29,7 +31,9 @@ const resolver: Resolver<FormValues> = async (values) => {
 const JoinOrganization = ({ setStep }) => {
   const [avatar, setAvatar] = React.useState<File | null>(null);
   const [loading, setLoading] = React.useState(false);
-  const { user } = useUser();
+  const { user,refetch } = useUser();
+  const router = useRouter();
+  const showToast = useToast();
   const {
     register,
     handleSubmit,
@@ -50,10 +54,15 @@ const JoinOrganization = ({ setStep }) => {
     joinOrganization(data.code, user?.id)
       .then((res) => {
         console.log(res);
+        refetch();
+        showToast("success", "Joined organization successfully");
+        router.push("/").catch((err) => console.log(err));
         setLoading(false);
       })
       .catch((err) => {
         console.log(err);
+        refetch();
+        showToast("error", "Failed to join organization");
         setLoading(false);
       });
   });

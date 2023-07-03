@@ -5,6 +5,7 @@ import { prisma } from "../../../server/db";
 import { formatResponse } from "../../../shared/sharedFunctions";
 import { ageGroups } from "../../../shared/constants";
 import { object } from "zod";
+import { NumericMonth } from "../../../shared/constants";
 
 type Body = {
   organizationId: string;
@@ -196,16 +197,23 @@ export default async function handler(
         // fill the rest of month with 0
         const lastYear = {};
         for (let i = 0; i < 12; i++) {
-          console.log("i", groupByMonth.date[i]);
           if (!groupByMonth.date[i]) {
             lastYear[i] = 0;
           } else {
             lastYear[i] = groupByMonth.date[i];
           }
         }
+        // map month to month name
+        const lastYearEntries = Object.entries(lastYear);
+        const lastYearEntriesWithMonthName = lastYearEntries.map((entry) => {
+          const [key, value] = entry;
+          const monthName = NumericMonth[key];
+          return [monthName, value];
+        });
+
         res
           .status(200)
-          .json(formatResponse(Object.entries(lastYear), "Success", "200"));
+          .json(formatResponse(lastYearEntriesWithMonthName, "Success", "200"));
       }
 
       if (metric === "t") {

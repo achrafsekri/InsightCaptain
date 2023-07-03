@@ -8,6 +8,9 @@ import { Avatar } from "primereact/avatar";
 import { useOrganization } from "../../Context/OrganizationContext";
 import { Ripple } from "primereact/ripple";
 import { useRouter } from "next/router";
+import { PlusCircleIcon } from "@heroicons/react/outline";
+import { Divider } from "@tremor/react";
+import { Button } from "primereact/button";
 
 type Props = {
   isOpen: boolean;
@@ -81,9 +84,7 @@ const SwitchOrganizationModal = ({ isOpen, setIsOpen, showToast }: Props) => {
                               "success",
                               organization.organization.name
                             );
-                            router.push("/").catch((err) => {
-                              console.log(err);
-                            });
+                            window.location.reload();
                             setIsOpen(false);
                           }}
                           className={
@@ -116,7 +117,10 @@ const SwitchOrganizationModal = ({ isOpen, setIsOpen, showToast }: Props) => {
                               {organization.organization.name}
                             </span>
                             <span className="text-sm">
-                              {organization.role?.toLowerCase()}
+                              {organization.role?.toLowerCase() === "admin" ||
+                              organization.role?.toLowerCase() === "owner"
+                                ? "Admin"
+                                : "Member"}
                             </span>
                           </div>
                           <Ripple />
@@ -124,6 +128,19 @@ const SwitchOrganizationModal = ({ isOpen, setIsOpen, showToast }: Props) => {
                       )
                     )
                   }
+                  <Divider />
+                  <Button
+                    onClick={(e) => {
+                      router.push("/organization").catch((err) => {});
+                    }}
+                    className={
+                      " relative mb-2 flex w-full items-center gap-2 rounded-md border-blue-200 bg-blue-50 p-2  focus:border-2 "
+                    }
+                    label="Create / Join organization"
+                    icon="pi pi-plus-circle"
+                  >
+                    <Ripple />
+                  </Button>
                 </div>
               </Dialog.Panel>
             </Transition.Child>

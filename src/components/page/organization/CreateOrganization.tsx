@@ -44,7 +44,7 @@ const resolver: Resolver<FormValues> = async (values) => {
 const { useUploadThing } = generateReactHelpers<OurFileRouter>();
 
 const CreateOrganization = ({ setStep }: Props) => {
-  const { user } = useUser();
+  const { user, refetch } = useUser();
   const [loading, setLoading] = React.useState<boolean>(false);
   const router = useRouter();
   const {
@@ -80,7 +80,8 @@ const CreateOrganization = ({ setStep }: Props) => {
       createOrganization(sendData)
         .then((res) => {
           setLoading(false);
-          router.push("/dashboard").catch((err) => console.log(err));
+          refetch();
+          router.push("/").catch((err) => console.log(err));
         })
         .catch((err) => {
           console.log(err);
@@ -96,7 +97,8 @@ const CreateOrganization = ({ setStep }: Props) => {
         createOrganization(sendData)
           .then((res) => {
             setLoading(false);
-            router.push("/dashboard").catch((err) => console.log(err));
+            refetch();
+            router.push("/").catch((err) => console.log(err));
           })
           .catch((err) => {
             console.log(err);

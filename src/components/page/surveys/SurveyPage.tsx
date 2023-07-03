@@ -93,7 +93,7 @@ const SurveyPage = () => {
   return (
     <main className="mx-auto max-w-7xl p-4 md:p-10">
       <ConfirmDialog />
-      {openShare && <ShareModal setIsOpen={setOpenShare} isOpen={openShare} />}
+      {openShare && <ShareModal setIsOpen={setOpenShare} isOpen={openShare} type="survey" />}
       {editSurvey && (
         <EditSurvey setIsOpen={setEditSurvey} isOpen={editSurvey} />
       )}
@@ -101,7 +101,9 @@ const SurveyPage = () => {
         <Title className="text-2xl">{info.title}</Title>
         <Text className="text-sm">{info.description}</Text>
         <div className="absolute top-4 right-4 flex gap-2">
-          <Button icon="pi pi-eye" rounded text aria-label="Filter" />
+          <Button icon="pi pi-eye" rounded text aria-label="Filter" onClick={
+            () => router.push(`/respond/survey/${info.id}?preview=true`).catch((err) => console.log(err))
+          } />
           <Button
             icon="pi pi-share-alt"
             rounded

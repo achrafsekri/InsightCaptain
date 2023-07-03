@@ -50,9 +50,6 @@ const Index = () => {
             <Text>An overview of your polls statistics and insights</Text>
           </div>
           <div>
-            <Button icon={DocumentDownloadIcon} className="mt-4">
-              Export
-            </Button>
             <Button
               icon={PlusCircleIcon}
               className="mt-4 ml-2"
@@ -66,9 +63,6 @@ const Index = () => {
         <Card className="mt-6">
           {!isLoading && polls && <PollTable polls={polls} />}
         </Card>
-        <div className="mt-6">
-          <PollKeywords />
-        </div>
       </main>
     </MainLayout>
   );

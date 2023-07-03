@@ -37,12 +37,8 @@ const chartdata = [
 
 const SurveyeesChart = () => {
   const [value, setValue] = useState<DateRangePickerValue>([
-    () => {
-      const date = new Date();
-      date.setDate(date.getDate() );
-      return date.toISOString();
-    },
-    new Date(),
+    new Date(new Date().setHours(0, 0, 0, 0)),
+    new Date(new Date().setHours(0, 0, 0, 0)),
     "tdy",
   ]);
   const { currentOrganization } = useOrganization();
@@ -59,8 +55,6 @@ const SurveyeesChart = () => {
   useEffect(() => {
     refetch();
   }, [value]);
-
-  
 
   return (
     <Card>

@@ -42,11 +42,8 @@ const Index = () => {
           <TopAnalytics statistics={stats} refetch={statsRefetch} />
         )}
         <Card className="mt-6">
-          {!isLoading && <SurveyTable surveys={surveys} />}
+          {!isLoading && <SurveyTable surveys={surveys} refetch={refetch} />}
         </Card>
-        <div className="mt-6">
-          <SurveyKeywords />
-        </div>
       </main>
     </MainLayout>
   );

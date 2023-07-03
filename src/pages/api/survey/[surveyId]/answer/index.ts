@@ -42,7 +42,7 @@ type SurveyAnswerReturn = {
 };
 
 type FormattedAnswer = {
-  quotation: string;
+  question: string;
   answer?: string;
 }[];
 
@@ -50,10 +50,7 @@ type Answer = {
   surveyFieldId: string;
   surveyFieldTitle: string;
   answer?: string;
-  pickedOptions?: {
-    id: string;
-    pickedOptionLable: string;
-  }[];
+  pickedOptions?: string[] | string;
   type: string;
 }[];
 
@@ -71,21 +68,24 @@ type SentimentAnalysis = {
 // getFormattedAnswer is a function that formats the answer to the format that GPT-3 expects
 const getFormattedAnswer = (answers: Answer) => {
   const reternedAnswer = answers.map((answer) => {
-    if (answer.type === "radio" && answer.pickedOptions?.length === 1) {
+    if (
+      answer.surveyFeild.type === "RADIO" &&
+      answer.pickedOptions?.length === 1
+    ) {
       return {
-        quotation: answer.surveyFieldTitle,
-        answer: answer.pickedOptions.map((option) => option.pickedOptionLable),
+        question: answer.surveyFeild.title,
+        answer: answer.pickedOptions.map((option) => option.title),
       };
     }
-    if (answer.type === "checkbox" && answer.pickedOptions) {
+    if (answer.surveyFeild.type === "CHECKBOX" && answer.pickedOptions) {
       return {
-        quotation: answer.surveyFieldTitle,
-        answer: answer.pickedOptions.map((option) => option.pickedOptionLable),
+        question: answer.surveyFeild.title,
+        answer: answer.pickedOptions.map((option) => option.title),
       };
     }
-    if (answer.type === "text") {
+    if (answer.surveyFeild.type === "TEXT") {
       return {
-        quotation: answer.surveyFieldTitle,
+        question: answer.surveyFeild.title,
         answer: answer.answer,
       };
     }
@@ -99,7 +99,7 @@ export default async function handler(
 ) {
   if (req.method === "POST") {
     const { surveyId } = req.query;
-    const { answer, email, fullName, phoneNumber, age, location, ipAddress } =
+    const { answer, email, fullName, age, location, ipAddress } =
       req.body as expectedPostBody;
     const SurveyAnswerReturn = {} as SurveyAnswerReturn;
 
@@ -140,9 +140,6 @@ export default async function handler(
           surveyId: surveyId as string,
           email,
           fullName,
-          sentiment: "POSITIVE",
-          requested: "requested",
-          phoneNumber,
           age,
           location: location,
           ipAddress: ipAddress,
@@ -155,20 +152,36 @@ export default async function handler(
           if (answer.type === "text") {
             return await prisma.surveyFeildAnswer.create({
               data: {
-                surveyAnswerId: surveyAnswer.id,
-                surveyFieldId: answer.surveyFieldId,
+                surveyAnswer: {
+                  connect: {
+                    id: surveyAnswer.id,
+                  },
+                },
+                surveyFeild: {
+                  connect: {
+                    id: answer.surveyFieldId,
+                  },
+                },
                 answer: answer.answer,
               },
             });
           }
-          if (answer.type === "radio" && answer.pickedOptions?.length === 1) {
+          if (answer.type === "radio") {
             return await prisma.surveyFeildAnswer.create({
               data: {
-                surveyAnswerId: surveyAnswer.id,
-                surveyFieldId: answer.surveyFieldId,
+                surveyAnswer: {
+                  connect: {
+                    id: surveyAnswer.id,
+                  },
+                },
+                surveyFeild: {
+                  connect: {
+                    id: answer.surveyFieldId,
+                  },
+                },
                 pickedOptions: {
                   connect: {
-                    id: answer?.pickedOptions[0]?.id,
+                    id: answer?.pickedOptions,
                   },
                 },
               },
@@ -177,11 +190,19 @@ export default async function handler(
           if (answer.type === "checkbox" && answer.pickedOptions) {
             return await prisma.surveyFeildAnswer.create({
               data: {
-                surveyAnswerId: surveyAnswer.id,
-                surveyFieldId: answer.surveyFieldId,
+                surveyAnswer: {
+                  connect: {
+                    id: surveyAnswer.id,
+                  },
+                },
+                surveyFeild: {
+                  connect: {
+                    id: answer.surveyFieldId,
+                  },
+                },
                 pickedOptions: {
                   connect: answer?.pickedOptions.map((option) => ({
-                    id: option.id,
+                    id: option,
                   })),
                 },
               },
@@ -189,21 +210,96 @@ export default async function handler(
           }
         })
       );
-      SurveyAnswerReturn.id = surveyAnswer.id;
-      SurveyAnswerReturn.surveyId = surveyAnswer.surveyId;
-      SurveyAnswerReturn.surveyAnswers = surveyAnswerFilling;
-      SurveyAnswerReturn.phoneNumber = surveyAnswer.phoneNumber;
-      SurveyAnswerReturn.email = surveyAnswer.email;
-      SurveyAnswerReturn.fullName = surveyAnswer.fullName;
-      SurveyAnswerReturn.age = surveyAnswer.age;
-      SurveyAnswerReturn.location = surveyAnswer.location;
-      SurveyAnswerReturn.ipAddress = surveyAnswer.ipAddress;
-      SurveyAnswerReturn.requested = surveyAnswer.requested;
-      SurveyAnswerReturn.sentiment = surveyAnswer.sentiment;
+      // sentiment analysis and most requested topics
+      const SurveyAnswerReturn = await prisma.surveyAnswer.findUnique({
+        where: {
+          id: surveyAnswer.id,
+        },
+        include: {
+          surveyFeildAnswer: {
+            include: {
+              pickedOptions: true,
+              surveyFeild: true,
+            },
+          },
+        },
+      });
+      const sentimentPayload = {
+        answer: getFormattedAnswer(SurveyAnswerReturn.surveyFeildAnswer),
+      };
+
+      const data = JSON.stringify(sentimentPayload);
+
+      const config = {
+        method: "post",
+        maxBodyLength: Infinity,
+        url: "http://localhost:3000/api/AI/sentiment",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        data: data,
+      };
+
+      const sentiment = await axios.request(config).catch((err) => {
+        return "failed";
+      });
+      if (sentiment !== "failed") {
+        const sentimentResult =
+          sentiment.data.data.google.general_sentiment.toUpperCase();
+
+        await prisma.surveyAnswer.update({
+          where: {
+            id: surveyAnswer.id,
+          },
+          data: {
+            sentiment: sentimentResult,
+          },
+        });
+      }
+
+      const mostRequestedConfig = {
+        method: "post",
+        maxBodyLength: Infinity,
+        url: "http://localhost:3000/api/AI/keywords",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        data: data,
+      };
+
+      const mostRequested = await axios
+        .request(mostRequestedConfig)
+        .catch((err) => {
+          return "error";
+        });
+      if (mostRequested !== "error") {
+        const mostRequestedResult = mostRequested.data.data;
+        await prisma.surveyAnswer.update({
+          where: {
+            id: surveyAnswer.id,
+          },
+          data: {
+            requested: mostRequestedResult,
+          },
+        });
+      }
+      const finalAnswer = await prisma.surveyAnswer.findUnique({
+        where: {
+          id: surveyAnswer.id,
+        },
+        include: {
+          surveyFeildAnswer: {
+            include: {
+              pickedOptions: true,
+              surveyFeild: true,
+            },
+          },
+        },
+      });
 
       return res
         .status(201)
-        .json(formatResponse(SurveyAnswerReturn, "Success", "201"));
+        .json(formatResponse(finalAnswer, "Success", "201"));
     } catch (error) {
       console.error(error);
       res
@@ -223,8 +319,6 @@ export default async function handler(
           surveyFeildAnswer: true,
         },
       });
-
-      
 
       if (!surveyAnswer) {
         return res

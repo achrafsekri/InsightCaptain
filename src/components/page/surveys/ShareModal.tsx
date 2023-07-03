@@ -3,20 +3,28 @@ import { Button } from "primereact/button";
 import { InputText } from "primereact/inputtext";
 import { Fragment, useState } from "react";
 import { useSingleSurvey } from "../../../pages/surveys/[surveyId]/edit";
+import { useRouter } from "next/router";
+import { useToast } from "../../../Context/ToastContext";
 
 type Props = {
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
+  type: "poll" | "survey";
 };
 
-export default function ShareModal({ isOpen, setIsOpen }: Props) {
-  const { survey } = useSingleSurvey();
-  const ShareLink = `https://survey-app-ten.vercel.app/survey/${
-    survey.id as string
-  }`;
+export default function ShareModal({ isOpen, setIsOpen, type }: Props) {
+  const router = useRouter();
+  const { pollId } = router.query;
+  const { surveyId } = router.query;
+  const showToast = useToast();
+
+  const ShareLink = `http://localhost:3000/respond/${
+    type == "survey" ? "survey" : "poll"
+  }/${type == "survey" ? surveyId : pollId}`;
   // copy to clipboard
   const copyToClipboard = () => {
     navigator.clipboard.writeText(ShareLink);
+    showToast("success", "Copied to clipboard");
   };
 
   function closeModal() {

@@ -7,6 +7,9 @@ type RequestBody = {
   pickedOption: string;
   pollId: string;
   location?: string;
+  name: string;
+  age: number;
+  email: string;
   ipAddress?: string;
 };
 
@@ -14,7 +17,8 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  const { pickedOption, pollId, location, ipAddress } = req.body as RequestBody;
+  const { pickedOption, pollId, location, ipAddress, name, age, email } =
+    req.body as RequestBody;
   if (req.method === "POST") {
     try {
       const pollAnswer = await prisma.pollAnswer.create({
@@ -23,6 +27,9 @@ export default async function handler(
           pollOptionId: pickedOption,
           location: location?.toLowerCase(),
           ipAddress: ipAddress,
+          name: name,
+          age: age,
+          email: email,
         },
       });
       res

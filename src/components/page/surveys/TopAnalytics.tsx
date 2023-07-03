@@ -33,9 +33,6 @@ const TopAnalytics = ({ statistics, refetch }: TopAnalyticsProps) => {
           <Text>An overview of your surveys analytics</Text>
         </div>
         <div>
-          <Button icon={DocumentDownloadIcon} className="mt-4">
-            Export
-          </Button>
           <Button
             icon={PlusCircleIcon}
             className="mt-4 ml-4"

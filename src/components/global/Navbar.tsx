@@ -7,11 +7,16 @@ import { signIn, signOut } from "next-auth/react";
 import Image from "next/image";
 import { routes } from "../../shared/routes";
 import Logo from "../../shared/Logo";
-import { LogoutIcon, SwitchVerticalIcon } from "@heroicons/react/outline";
+import {
+  LogoutIcon,
+  PencilAltIcon,
+  SwitchVerticalIcon,
+} from "@heroicons/react/outline";
 import { useState } from "react";
 import SwitchOrganizationModal from "./SwitchOrganizationModal";
 import { Toast } from "primereact/toast";
 import { User } from "@prisma/client";
+import { useRouter } from "next/router";
 
 type ToastProps = {
   state: string;
@@ -28,6 +33,7 @@ function classNames(...classes: string[]) {
 
 export default function Navbar({ user }: { user: User }) {
   const pathname = usePathname();
+  const router = useRouter();
   const toast = useRef(null);
   const [switchOrganizationModalOpen, setSwitchOrganizationModalOpen] =
     useState(false);
@@ -116,6 +122,20 @@ export default function Navbar({ user }: { user: User }) {
                             >
                               <SwitchVerticalIcon className="mr-2 h-5 w-5 text-gray-400" />
                               Switch organization
+                            </button>
+                          )}
+                        </Menu.Item>
+                        <Menu.Item>
+                          {({ active }) => (
+                            <button
+                              className={classNames(
+                                active ? "bg-gray-100" : "",
+                                "flex w-full px-4 py-2 text-sm text-gray-700"
+                              )}
+                              onClick={() => router.push("/organization/edit")}
+                            >
+                              <PencilAltIcon className="mr-2 h-5 w-5 text-gray-400" />
+                              Edit organization
                             </button>
                           )}
                         </Menu.Item>

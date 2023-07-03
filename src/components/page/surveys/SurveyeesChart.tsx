@@ -18,8 +18,8 @@ import { useRouter } from "next/router";
 
 const SurveyeesChart = () => {
   const [value, setValue] = useState<DateRangePickerValue>([
-    new Date(),
-    new Date(),
+    new Date(new Date().setHours(0, 0, 0, 0)),
+    new Date(new Date().setHours(0, 0, 0, 0)),
     "tdy",
   ]);
   console.log(value);

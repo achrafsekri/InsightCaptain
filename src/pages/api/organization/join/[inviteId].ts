@@ -22,26 +22,29 @@ export default async function handler(
   try {
     const getInvite = await prisma.invite.findUnique({
       where: {
-        id: inviteId as string,
+        invitationCode: inviteId as string,
       },
       include: {
         organization: true,
       },
     });
+    if (!getInvite) {
+      return res.status(404).json({ message: "Invite not found" });
+    }
     const { organization } = getInvite as invite & {
       organization: Organization;
     };
     const addUser = await prisma.userOrganization.create({
       data: {
         userId,
-        role: "MEMBER",
+        role: getInvite?.role,
         organizationId: organization.id,
       },
     });
     if (addUser) {
       await prisma.invite.update({
         where: {
-          id: inviteId as string,
+          invitationCode: inviteId as string,
         },
         data: {
           joined: true,

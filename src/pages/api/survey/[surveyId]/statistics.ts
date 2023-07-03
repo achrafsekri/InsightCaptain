@@ -12,10 +12,13 @@ export default async function handler(
   if (req.method === "GET") {
     try {
       const { surveyId } = req.query;
-      const countriesWithMostResponses = prisma.surveyAnswer.groupBy({
+
+      const TopCountryWithMostResponses = await prisma.surveyAnswer.groupBy({
         by: ["location"],
         where: {
-          surveyId: surveyId as string,
+          survey: {
+            id: surveyId as string,
+          },
         },
         _count: {
           location: true,
@@ -25,8 +28,9 @@ export default async function handler(
             location: "desc",
           },
         },
-        take: 5,
+        take: 6,
       });
+
       const respondantsByAge = await prisma.surveyAnswer.groupBy({
         by: ["age"],
         where: {
@@ -115,10 +119,13 @@ export default async function handler(
 
       const stats = {
         countriesWithMostResponses:
-          countriesWithMostResponses == {} ? countriesWithMostResponses : [],
+          TopCountryWithMostResponses == {} ? [] : TopCountryWithMostResponses,
+        countryWithMostResponses:
+        TopCountryWithMostResponses == {} ? [] : TopCountryWithMostResponses[0],
         totalRespondants,
         ageGroupsData,
         sentiments: sentimentsFormatted,
+        responses: TopCountryWithMostResponses,
       };
       res.status(200).json(formatResponse(stats, "Survey stats", "200"));
     } catch {

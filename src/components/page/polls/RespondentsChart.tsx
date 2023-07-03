@@ -23,10 +23,11 @@ const RespondentsChart = ({ type }) => {
     return date.toISOString();
   };
   const [value, setValue] = useState<DateRangePickerValue>([
-    new Date(),
-    new Date(),
+    new Date(new Date().setHours(0, 0, 0, 0)),
+    new Date(new Date().setHours(0, 0, 0, 0)),
     "tdy",
   ]);
+  console.log(value);
   const router = useRouter();
   const { pollId } = router.query;
   const { currentOrganization } = useOrganization();

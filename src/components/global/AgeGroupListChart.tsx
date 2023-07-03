@@ -2,6 +2,10 @@ import React from "react";
 import { Card, Metric, Text, Flex, Bold, List, ListItem } from "@tremor/react";
 import { findMaxAgeGroup } from "../../lib/helpers";
 
+const takeTowAfterComma = (number: number) => {
+  return Math.round((number + Number.EPSILON) * 100) / 100;
+};
+
 type AgeGroupListChartProps = {
   type: string;
   data: { name: string; value: number; persantage: number }[];
@@ -28,7 +32,7 @@ const AgeGroupListChart = ({ type, data }: AgeGroupListChartProps) => {
             <Flex justifyContent="start" className="space-x-2.5 truncate">
               <Text className="truncate">{group.name}</Text>
             </Flex>
-            <Text>{group.persantage}%</Text>
+            <Text>{takeTowAfterComma(group.persantage)}%</Text>
           </ListItem>
         ))}
       </List>

@@ -134,9 +134,7 @@ const CaseStudyAnalytics = () => {
               />
             </Grid>
           </div>
-          <div className="mt-6">
-            <Keywords />
-          </div>
+
           {/* <div className="mt-6">
           <Card>
             <div className="h-96 overflow-auto scrollbar scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">

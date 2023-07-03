@@ -18,81 +18,18 @@ import { useState } from "react";
 import { TrashIcon } from "@heroicons/react/outline";
 import { Ripple } from "primereact/ripple";
 import { deleteSurvey, getSurveysByCaseStudy } from "../../../../lib/apiCalls";
-import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/router";
 import AddSurveyModal from "../../surveys/AddSurveyModal";
-import { Survey } from "@prisma/client";
+import { type Survey } from "@prisma/client";
 
-// const surveys = [
-//   {
-//     id: "0",
-//     title: "survey1",
-//     description: "smalll description",
-//     numberOfRespondats: "300",
-//   },
-//   {
-//     id: "1",
-//     title: "survey2",
-//     description: "smalll description",
-//     numberOfRespondats: "300",
-//   },
-//   {
-//     id: "2",
-//     title: "survey3",
-//     description: "smalll description",
-//     numberOfRespondats: "300",
-//   },
-//   {
-//     id: "3",
-//     title: "survey4",
-//     description: "smalll description",
-//     numberOfRespondats: "300",
-//   },
-//   {
-//     id: "4",
-//     title: "survey5",
-//     description: "smalll description",
-//     numberOfRespondats: "300",
-//   },
-//   {
-//     id: "5",
-//     title: "survey6",
-//     description: "smalll description",
-//     numberOfRespondats: "300",
-//   },
-//   {
-//     id: "6",
-//     title: "survey4",
-//     description: "smalll description",
-//     numberOfRespondats: "300",
-//   },
-//   {
-//     id: "7",
-//     title: "survey5",
-//     description: "smalll description",
-//     numberOfRespondats: "300",
-//   },
-//   {
-//     id: "8",
-//     title: "survey6",
-//     description: "smalll description",
-//     numberOfRespondats: "300",
-//   },
-// ];
-
-const SurveyTable = () => {
+type Props = {
+  refetch: () => void;
+  surveys: Survey[];
+};
+const SurveyTable = ({ refetch, surveys }: Props) => {
   const [OpenAddSurveyModale, setOpenAddSurveyModale] = useState(false);
   const { caseStudyId } = useRouter().query;
-  const {
-    data: surveys,
-    isLoading,
-    isError,
-    error,
-    refetch,
-  } = useQuery<Survey[]>(["surveys"], () =>
-    getSurveysByCaseStudy(caseStudyId as string)
-  );
-  console.log("fe", caseStudyId);
+
   const handleDelete = (id: string) => {
     deleteSurvey(id)
       .then(() => {
@@ -117,9 +54,8 @@ const SurveyTable = () => {
         <div>
           <Flex justifyContent="start" className="space-x-2">
             <Title>Surveys</Title>
-            <Badge color="gray">{!isLoading ? surveys?.length : "N/A"}</Badge>
+            <Badge color="gray">{surveys ? surveys?.length : "N/A"}</Badge>
           </Flex>
-          <Text className="mt-2">Case study name</Text>
         </div>
         <Button
           size="xs"
@@ -143,7 +79,7 @@ const SurveyTable = () => {
         </TableHead>
 
         <TableBody>
-          {!isLoading &&
+          {surveys &&
             surveys.map((item, index) => (
               <TableRow key={index}>
                 <TableCell>{index + 1}</TableCell>

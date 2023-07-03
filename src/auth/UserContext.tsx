@@ -5,8 +5,6 @@ import { getUser } from "../lib/apiCalls";
 import { useQuery } from "@tanstack/react-query";
 import Loading from "../components/global/Loading";
 
-
-
 interface UserContextType {
   user: User;
 }
@@ -22,6 +20,7 @@ export const UserProvider = ({ children }: Props) => {
   const {
     data: user,
     isLoading,
+    refetch,
     isError,
   } = useQuery(["user"], () => getUser(session?.user.id));
 
@@ -35,7 +34,9 @@ export const UserProvider = ({ children }: Props) => {
   }
 
   return (
-    <UserContext.Provider value={{ user }}>{children}</UserContext.Provider>
+    <UserContext.Provider value={{ user, refetch }}>
+      {children}
+    </UserContext.Provider>
   );
 };
 

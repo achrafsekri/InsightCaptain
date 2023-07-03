@@ -17,76 +17,37 @@ import Link from "next/link";
 import { useState } from "react";
 import { TrashIcon } from "@heroicons/react/outline";
 import { Ripple } from "primereact/ripple";
+import { Poll } from "@prisma/client";
+import AddPollModal from "../../polls/AddPollModal";
+import { useRouter } from "next/router";
 
-const polls = [
-  {
-    id: "0",
-    title: "poll1",
-    description: "smalll description",
-    numberOfRespondats: "300",
-  },
-  {
-    id: "1",
-    title: "poll2",
-    description: "smalll description",
-    numberOfRespondats: "300",
-  },
-  {
-    id: "2",
-    title: "poll3",
-    description: "smalll description",
-    numberOfRespondats: "300",
-  },
-  {
-    id: "3",
-    title: "poll4",
-    description: "smalll description",
-    numberOfRespondats: "300",
-  },
-  {
-    id: "4",
-    title: "poll5",
-    description: "smalll description",
-    numberOfRespondats: "300",
-  },
-  {
-    id: "5",
-    title: "poll6",
-    description: "smalll description",
-    numberOfRespondats: "300",
-  },
-  {
-    id: "6",
-    title: "poll4",
-    description: "smalll description",
-    numberOfRespondats: "300",
-  },
-  {
-    id: "7",
-    title: "poll5",
-    description: "smalll description",
-    numberOfRespondats: "300",
-  },
-  {
-    id: "8",
-    title: "poll6",
-    description: "smalll description",
-    numberOfRespondats: "300",
-  },
-];
+type Props = {
+  polls: Poll[];
+  refetch: () => void;
+};
 
-const PollTable = () => {
+const PollTable = ({ polls, refetch }: Props) => {
+  const { caseStudyId } = useRouter().query;
   const [OpenAddPollModale, setOpenAddPollModale] = useState(false);
   const handleDelete = (id: string) => {
     console.log(id);
   };
   return (
     <Card>
+      {OpenAddPollModale && (
+        <AddPollModal
+          isOpen={OpenAddPollModale}
+          setIsOpen={setOpenAddPollModale}
+          caseStudyId={caseStudyId as string}
+        />
+      )}
       <div className="flex items-center justify-between">
         <div>
           <Flex justifyContent="start" className="space-x-2">
             <Title>Polls</Title>
-            <Badge color="gray">8</Badge>
+            <Badge color="gray">{
+              polls? polls.length : 'NaN'
+            }</Badge>
           </Flex>
           <Text className="mt-2">Case study name</Text>
         </div>
@@ -105,7 +66,7 @@ const PollTable = () => {
           <TableRow>
             <TableHeaderCell>poll Id</TableHeaderCell>
             <TableHeaderCell>Name</TableHeaderCell>
-            <TableHeaderCell>N° respondants</TableHeaderCell>
+            <TableHeaderCell>N° Votes</TableHeaderCell>
             <TableHeaderCell>Link</TableHeaderCell>
             <TableHeaderCell>Action</TableHeaderCell>
           </TableRow>
@@ -116,7 +77,7 @@ const PollTable = () => {
             <TableRow key={index}>
               <TableCell>{index + 1}</TableCell>
               <TableCell>{item.title}</TableCell>
-              <TableCell>{item.numberOfRespondats}</TableCell>
+              <TableCell>{item.totalVotes}</TableCell>
 
               <TableCell>
                 <Button size="xs" color="blue" variant="primary">
@@ -126,7 +87,7 @@ const PollTable = () => {
               <TableCell>
                 <button
                   onClick={() => handleDelete(item.id)}
-                  className="text-red-400 flex items-center justify-center p-2 hover:bg-red-500 hover:text-white rounded-lg"
+                  className="flex items-center justify-center rounded-lg p-2 text-red-400 hover:bg-red-500 hover:text-white"
                 >
                   <TrashIcon className="h-5 w-5" />
                   <Ripple />

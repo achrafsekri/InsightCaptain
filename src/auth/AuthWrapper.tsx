@@ -11,6 +11,7 @@ type Props = {
 const AuthWrapper = ({ children }: Props) => {
   const router = useRouter();
   const session = useSession();
+  console.log("path", router.pathname);
   if (session.status === "loading") {
     return <Loading />;
   }

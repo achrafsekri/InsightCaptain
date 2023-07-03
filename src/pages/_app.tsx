@@ -16,6 +16,7 @@ import "primereact/resources/primereact.min.css";
 import "primeicons/primeicons.css";
 import { publicRoutes } from "../shared/constants";
 import { useRouter } from "next/router";
+import { ToastProvider } from "../Context/ToastContext";
 
 const MyApp: AppType<{ session: Session | null }> = ({
   Component,
@@ -27,23 +28,25 @@ const MyApp: AppType<{ session: Session | null }> = ({
   const router = useRouter();
   return (
     <SessionProvider session={session}>
-      <QueryClientProvider client={queryClient}>
-        <AuthWrapper>
-          {!publicRoutes.includes(router.pathname) && (
-            <UserProvider>
-              <OrganizationWrapper>
-                <Providers>
-                  <Component {...pageProps} />
-                  <ReactQueryDevtools initialIsOpen={false} />
-                </Providers>
-              </OrganizationWrapper>
-            </UserProvider>
-          )}
-          {publicRoutes.includes(router.pathname) && (
-            <Component {...pageProps} />
-          )}
-        </AuthWrapper>
-      </QueryClientProvider>
+      <ToastProvider>
+        <QueryClientProvider client={queryClient}>
+          <AuthWrapper>
+            {!publicRoutes.includes(router.pathname) && (
+              <UserProvider>
+                <OrganizationWrapper>
+                  <Providers>
+                    <Component {...pageProps} />
+                    <ReactQueryDevtools initialIsOpen={false} />
+                  </Providers>
+                </OrganizationWrapper>
+              </UserProvider>
+            )}
+            {publicRoutes.includes(router.pathname) && (
+              <Component {...pageProps} />
+            )}
+          </AuthWrapper>
+        </QueryClientProvider>
+      </ToastProvider>
     </SessionProvider>
   );
 };

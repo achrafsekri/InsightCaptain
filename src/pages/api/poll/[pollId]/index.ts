@@ -5,12 +5,14 @@ import { formatResponse } from "../../../../shared/sharedFunctions";
 import { Poll } from "@prisma/client";
 
 type PatchBody = {
-  pollTitle: string;
-  options: {
+  pollTitle?: string;
+  question?: string;
+  helperText?: string;
+  options?: {
     id: string;
     title: string;
-    votes: number;
-    totalVotes: number;
+    votes?: number;
+    totalVotes?: number;
   }[];
 };
 
@@ -57,7 +59,7 @@ export default async function handler(
 
   if (req.method === "PATCH") {
     const { pollId } = req.query;
-    const { pollTitle, options } = req.body as PatchBody;
+    const { pollTitle, options, question, helperText } = req.body as PatchBody;
     try {
       pollTitle &&
         (await prisma.poll.update({
@@ -66,17 +68,13 @@ export default async function handler(
           },
           data: {
             title: pollTitle,
+            question: question,
+            helperText: helperText,
           },
         }));
 
       options?.map(async (option) => {
-        const optionExists = await prisma.pollOption.findUnique({
-          where: {
-            id: option.id,
-          },
-        });
-
-        if (optionExists) {
+        if (option.id) {
           await prisma.pollOption.update({
             where: {
               id: option.id,
@@ -86,7 +84,16 @@ export default async function handler(
             },
           });
         } else {
-          res.status(400).json(formatResponse(null, "Option not found", "400"));
+          await prisma.pollOption.create({
+            data: {
+              title: option.title,
+              poll: {
+                connect: {
+                  id: pollId as string,
+                },
+              },
+            },
+          });
         }
       });
       res.status(200).json(formatResponse(null, "Poll updated", "200"));
@@ -98,12 +105,30 @@ export default async function handler(
 
   if (req.method === "DELETE") {
     const { pollId } = req.query;
+    console.log(pollId);
     try {
+      const poll = await prisma.poll.findUnique({
+        where: {
+          id: pollId as string,
+        },
+      });
+      console.log(poll);
+      if (!poll) {
+        return res
+          .status(400)
+          .json(formatResponse(null, "Poll not found", "400"));
+      }
+      await prisma.pollOption.deleteMany({
+        where: {
+          pollId: pollId as string,
+        },
+      });
       await prisma.poll.delete({
         where: {
           id: pollId as string,
         },
       });
+
       res
         .status(200)
         .json(formatResponse(null, "Poll deleted successfully", "200"));

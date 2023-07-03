@@ -40,9 +40,6 @@ const PollTopAnalytics = ({ data }: Props) => {
           <Text>An overview of your poll statistics and insights</Text>
         </div>
         <div>
-          <Button icon={DocumentDownloadIcon} className="mt-4">
-            Export
-          </Button>
           <Button
             icon={PencilAltIcon}
             className="mt-4 ml-2"
@@ -62,7 +59,15 @@ const PollTopAnalytics = ({ data }: Props) => {
 
       {/* KPI section */}
       <Grid numColsMd={2} className="mt-6 gap-6">
-        <Card>{!isLoading && !isError && <PollAnswerBarlist data={data.options} />}</Card>
+        <Card>
+          {!isLoading && !isError && (
+            <PollAnswerBarlist
+              data={data.options}
+              question={data.question}
+              totalVotes={stats.totalRespondants}
+            />
+          )}
+        </Card>
         <Card>
           {!isLoading && !isError && (
             <ListChart

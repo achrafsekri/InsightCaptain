@@ -1,9 +1,13 @@
 import { NextApiRequest, NextApiResponse } from "next";
+//
 import { getServerSession } from "next-auth/next";
 import { prisma } from "../../../../server/db";
 import { formatResponse } from "../../../../shared/sharedFunctions";
+import { ageGroups } from "../../../../shared/constants";
+import { NumericMonth } from "../../../../shared/constants";
 
 type Body = {
+  organizationId: string;
   range: string;
 };
 
@@ -14,11 +18,10 @@ export default async function handler(
   if (req.method !== "POST") {
     res.status(400).json(formatResponse(null, "Invalid request method", "400"));
   }
+  const {pollId} = req.query
   if (req.method === "POST") {
     try {
-      const { range } = req.body as Body;
-      const { pollId } = req.query;
-
+      const {  range } = req.body as Body;
       const start = range[0];
       let end = range[1];
       const metric = range[2];
@@ -43,7 +46,7 @@ export default async function handler(
           by: ["createdAt"],
           where: {
             poll: {
-              id: String(pollId),
+              id: pollId as string,
             },
             createdAt: {
               gte: new Date(start),
@@ -51,6 +54,7 @@ export default async function handler(
             },
           },
         });
+
         // fil the days with 0
         const groupByDay = respondants.reduce((acc, curr) => {
           const date = new Date(curr.createdAt).toLocaleDateString();
@@ -81,20 +85,19 @@ export default async function handler(
           .status(200)
           .json(formatResponse(Object.entries(lastMonth), "Success", "200"));
       }
-      const respondents = await prisma.pollAnswer.findMany({
+      const respondents = await prisma.pollAnswer.groupBy({
+        by: ["createdAt"],
         where: {
           poll: {
-            id: String(pollId),
+            id: pollId as string,
           },
           createdAt: {
             gte: new Date(start),
             lte: new Date(end),
           },
         },
-        select: {
-          createdAt: true,
-        },
       });
+      console.log("respondants", respondents);
 
       if (metric === "w") {
         const groupByDay = respondents.reduce((acc, curr) => {
@@ -194,16 +197,23 @@ export default async function handler(
         // fill the rest of month with 0
         const lastYear = {};
         for (let i = 0; i < 12; i++) {
-          console.log("i", groupByMonth.date[i]);
           if (!groupByMonth.date[i]) {
             lastYear[i] = 0;
           } else {
             lastYear[i] = groupByMonth.date[i];
           }
         }
+        // map month to month name
+        const lastYearEntries = Object.entries(lastYear);
+        const lastYearEntriesWithMonthName = lastYearEntries.map((entry) => {
+          const [key, value] = entry;
+          const monthName = NumericMonth[key];
+          return [monthName, value];
+        });
+
         res
           .status(200)
-          .json(formatResponse(Object.entries(lastYear), "Success", "200"));
+          .json(formatResponse(lastYearEntriesWithMonthName, "Success", "200"));
       }
 
       if (metric === "t") {

@@ -2,10 +2,12 @@ import { NextApiRequest, NextApiResponse } from "next";
 import { getServerSession } from "next-auth/next";
 import { prisma } from "../../../server/db";
 import { formatResponse } from "../../../shared/sharedFunctions";
+import { Role } from "@prisma/client";
 
 type Body = {
   email: string;
   organizationId: string;
+  role: Role;
 };
 
 export default async function handler(
@@ -14,11 +16,12 @@ export default async function handler(
 ) {
   if (req.method === "POST") {
     try {
-      const { email, organizationId } = req.body as Body;
+      const { email, organizationId, role } = req.body as Body;
 
       const createInvite = await prisma.invite.create({
         data: {
           email: String(email),
+          role: role.toUpperCase() as Role,
           organization: {
             connect: {
               id: String(organizationId),

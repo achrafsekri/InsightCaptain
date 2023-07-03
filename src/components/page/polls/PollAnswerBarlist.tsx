@@ -1,8 +1,15 @@
+import { PollOption } from "@prisma/client";
 import { BarList, Card, Title, Bold, Flex, Text } from "@tremor/react";
 
 import React from "react";
 
-const PollAnswerBarlist = ({ data }) => {
+type Props = {
+  data: PollOption[];
+  question: string;
+  totalVotes: number;
+};
+
+const PollAnswerBarlist = ({ data, question, totalVotes }: Props) => {
   const barListData = data.map((item) => {
     return {
       name: item.title,
@@ -11,7 +18,8 @@ const PollAnswerBarlist = ({ data }) => {
   });
   return (
     <Card className="max-w-lg">
-      <Title>Which of these is your favourite social media platform</Title>
+      <Title>{question}</Title>
+      <Text className="mt-2">Total votes: {totalVotes}</Text>
       <Flex className="mt-4">
         <Text>
           <Bold>option</Bold>
